@@ -1,4 +1,10 @@
 <?php
+/*
+ * Interface file for WP Blip! Wordpress plugin
+ *
+ * Author: Marcin Sztolcman (http://urzenia.net)
+ */
+
 $quant	= get_option ('wp_blip_quant');
 if (!$quant) {
 	$quant = 10;
