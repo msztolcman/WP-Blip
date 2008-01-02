@@ -6,7 +6,7 @@
  * Version: 0.1
  * Author: Marcin 'MySZ' Sztolcman
  * Author URI: http://urzenia.net/
- * SVNVersion: $Id: wp-blip.php 2 2007-12-31 17:15:56Z mysz $
+ * SVNVersion: $Id$
  */
 
 $wp_blip_cacheroot = dirname (__FILE__);
