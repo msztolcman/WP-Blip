@@ -1,8 +1,8 @@
 <?php
 /*
  * Plugin Name: WP-Blip!
- * Plugin URI: http://repo.urzenia.net/PHP:WP-Blip
- * Description: Wtyczka wyświetla ostatnie wpisy z <a href="http://www.pinger.pl">blip.pl</a>.
+ * Plugin URI: http://repo.urzenia.net/PHP:WP-Blip!
+ * Description: Wtyczka wyświetla ostatnie wpisy z <a href="http://blip.pl">blip.pl</a>.
  * Version: 0.1
  * Author: Marcin 'MySZ' Sztolcman
  * Author URI: http://urzenia.net/
