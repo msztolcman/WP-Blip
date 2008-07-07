@@ -3,7 +3,7 @@
  * Plugin Name: WP-Blip!
  * Plugin URI: http://repo.urzenia.net/PHP:WP-Blip!
  * Description: Wtyczka wyświetla ostatnie wpisy z <a href="http://blip.pl">blip.pl</a>.
- * Version: 0.1
+ * Version: 0.2
  * Author: Marcin 'MySZ' Sztolcman
  * Author URI: http://urzenia.net/
  * SVNVersion: $Id$
@@ -72,6 +72,22 @@ function wp_blip_start ($login, $password, $quant) {
 	}
 }
 
+function wp_blip_linkify ($status, $opts = array ()) {
+    if (!$status) {
+        return $status;
+    }
+
+    if (!isset ($opts['wo_users']) || !$opts['wo_users']) {
+        $status = preg_replace ('#\^(\w+)#', '<a href="http://$1.blip.pl/">^$1</a>', $status);
+    }
+
+    if (!isset ($opts['wo_tags']) || !$opts['wo_tags']) {
+        $status = preg_replace ('/#(\w+)/', '<a href="http://blip.pl/tags/$1">#$1</a>', $status);
+    }
+
+    return $status;
+}
+
 function wp_blip_cache ($login, $password, $quant=null, $time=null) {
 	if (!$login || !$password) {
 		return false;
@@ -112,7 +128,7 @@ function wp_blip_cache ($login, $password, $quant=null, $time=null) {
 		foreach ($statuses['body'] as $status) {
 			$save[] = array (
 				'created_at'	=> $status->created_at,
-				'body'			=> $status->body,
+				'body'			=> wp_blip_linkify ($status->body),
 				'id'			=> $status->id,
 			);
 		}
