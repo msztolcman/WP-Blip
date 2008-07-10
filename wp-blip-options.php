@@ -19,6 +19,11 @@ $tpl	= get_option ('wp_blip_tpl');
 if (!$tpl) {
 	$tpl = '<li>(%date) %body</li>';
 }
+
+$dateformat	= get_option ('wp_blip_dateformat');
+if (!$dateformat) {
+	$dateformat = '%Y-%m-%d %H-%M-%S';
+}
 ?>
 <div class="wrap">
 	<form method="post" action="options.php">
@@ -53,10 +58,16 @@ if (!$tpl) {
 					Przykład: &lt;li&gt;&lt;h4&gt;&lt;a href=&quot;%url&quot;&gt;%date&lt;/a&gt;&lt;/h4&gt;&lt;br /&gt;%body&lt;/li&gt;
 				</td>
 			</tr>
+			<tr valign="top">
+				<th scope="row"><label for="wp_blip_dateformat">Szablon daty:</label></th>
+				<td><input type="text" name="wp_blip_dateformat" id="wp_blip_dateformat" value="<?php echo htmlentities2 ($dateformat) ?>" size="50"/><br />
+					Szczegóły: <a href="http://php.net/strftime">php.net/strftime</a>
+				</td>
+			</tr>
 		</table>
 		<p class="submit"><input type="submit" name="Submit" value="<?php _e('Update Options &raquo;') ?>" /></p>
 
 		<input type="hidden" name="action" value="update" />
-		<input type="hidden" name="page_options" value="wp_blip_login,wp_blip_password,wp_blip_quant,wp_blip_time,wp_blip_tpl" />
+		<input type="hidden" name="page_options" value="wp_blip_login,wp_blip_password,wp_blip_quant,wp_blip_time,wp_blip_tpl,wp_blip_dateformat" />
 	</form>
 </div>

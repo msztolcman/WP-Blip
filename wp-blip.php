@@ -3,7 +3,7 @@
  * Plugin Name: WP-Blip!
  * Plugin URI: http://repo.urzenia.net/PHP:WP-Blip!
  * Description: Wtyczka wyświetla ostatnie wpisy z <a href="http://blip.pl">blip.pl</a>.
- * Version: 0.2
+ * Version: 0.3
  * Author: Marcin 'MySZ' Sztolcman
  * Author URI: http://urzenia.net/
  * SVNVersion: $Id$
@@ -33,6 +33,11 @@ function wp_blip ($join="\n", $echo=0) {
 		$time	= 300;
 	}
 
+	$dateformat	= get_option ('wp_blip_dateformat');
+	if (!$dateformat) {
+		$dateformat	= '%Y-%m-%d %H:%M:%S';
+	}
+
 
 
 	$updates = wp_blip_cache ($login, $password, $quant, $time);
@@ -41,7 +46,7 @@ function wp_blip ($join="\n", $echo=0) {
 	$ret = array ();
 	foreach ($updates as $update) {
 		$rep = array (
-			$update['created_at'],
+			strftime ($dateformat, $update['created_at']),
 			$update['body'],
 			'http://blip.pl/s/'. $update['id'],
 		);
@@ -72,17 +77,28 @@ function wp_blip_start ($login, $password, $quant) {
 	}
 }
 
+$wp_blip_linkify__plchars = array (
+    'iso-8859-2'    => "\xb1\xbf\xb6\xbc\xea\xe6\xf1\xb3\xf3\xa1\xaf\xa6\xac\xca\xc6\xd1\xa3\xd3",
+    'cp1250'        => "\xb9\xbf\x9c\x9f\xea\xe6\xf1\xb3\xf3\xa5\xaf\x8c\x8f\xca\xc6\xd1\xa3\xd3",
+    'utf-8'         => "\xc4\x85\xc4\x84\xc4\x86\xc4\x87\xc4\x98\xc4\x99\xc5\x81\xc5\x82\xc5\x83".
+                       "\xc5\x84\xc5\x9a\xc5\x9b\xc5\xbb\xc5\xbc\xc5\xb9\xc5\xba\xc3\xb3\xc3\x93"
+);
 function wp_blip_linkify ($status, $opts = array ()) {
     if (!$status) {
         return $status;
     }
+    $plchars    = '';
+    $charset    = strtolower (get_option('blog_charset'));
+    if (isset ($GLOBALS['wp_blip_linkify__plchars'][$charset])) {
+        $plchars = $GLOBALS['wp_blip_linkify__plchars'][$charset];
+    }
 
     if (!isset ($opts['wo_users']) || !$opts['wo_users']) {
-        $status = preg_replace ('#\^(\w+)#', '<a href="http://$1.blip.pl/">^$1</a>', $status);
+        $status = preg_replace ('#\^([\w'.$plchars.']+)#', '<a href="http://$1.blip.pl/">^$1</a>', $status);
     }
 
     if (!isset ($opts['wo_tags']) || !$opts['wo_tags']) {
-        $status = preg_replace ('/#(\w+)/', '<a href="http://blip.pl/tags/$1">#$1</a>', $status);
+        $status = preg_replace ('/#([\w'.$plchars.']+)/', '<a href="http://blip.pl/tags/$1">#$1</a>', $status);
     }
 
     return $status;
@@ -118,7 +134,7 @@ function wp_blip_cache ($login, $password, $quant=null, $time=null) {
 		$bapi = new BlipApi ($login, $password);
 #         $bapi->debug =1;
 		$bapi->connect ();
-		$bapi->uagent = 'WP Blip!/0.1 (http://repo.urzenia.net/PHP:WP_Blip!';
+		$bapi->uagent = 'WP Blip!/0.3 (http://wp-blip.googlecode.com';
 
 		$statuses = $bapi->status_read (null, null, array (), false, $quant);
 
@@ -126,8 +142,9 @@ function wp_blip_cache ($login, $password, $quant=null, $time=null) {
 
 		$save = array ();
 		foreach ($statuses['body'] as $status) {
+            $date = preg_split ('#[: -]#', $status->created_at);
 			$save[] = array (
-				'created_at'	=> $status->created_at,
+				'created_at'	=> mktime ($date[3], $date[4], $date[5], $date[1], $date[2], $date[0]),
 				'body'			=> wp_blip_linkify ($status->body),
 				'id'			=> $status->id,
 			);
