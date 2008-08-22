@@ -3,13 +3,21 @@
  * Plugin Name: WP-Blip!
  * Plugin URI: http://repo.urzenia.net/PHP:WP-Blip!
  * Description: Wtyczka wyświetla ostatnie wpisy z <a href="http://blip.pl">blip.pl</a>.
- * Version: 0.3.1
+ * Version: 0.3.2
  * Author: Marcin 'MySZ' Sztolcman
  * Author URI: http://urzenia.net/
  * SVNVersion: $Id$
  */
 
+define ('WP_BLIP_DEBUG', false);
 $wp_blip_cacheroot = dirname (__FILE__);
+
+if (
+    (!is_dir ($wp_blip_cacheroot) || !is_writeable ($wp_blip_cacheroot)) &&
+    function_exists ('sys_get_temp_dir')
+) {
+    $wp_blip_cacheroot = sys_get_temp_dir ();
+}
 
 function wp_blip ($join="\n", $echo=0) {
 	$login		= get_option ('wp_blip_login');
@@ -110,10 +118,14 @@ function wp_blip_cache ($login, $password, $quant=null, $time=null) {
 		$time = 300;
 	}
 
+    if (!is_dir ($GLOBALS['wp_blip_cacheroot']) || !is_writeable ($GLOBALS['wp_blip_cacheroot'])) {
+        trigger_error ('WP-Blip! cannot write cache file in '. $GLOBALS['wp_blip_cacheroot'] .' directory.', E_USER_NOTICE);
+    }
+
 	$cachefile = $GLOBALS['wp_blip_cacheroot'] . '/' . $login . '_' . $quant . '.cache.txt';
 
 	$ret = array ();
-	if ($time && file_exists ($cachefile) && (filemtime ($cachefile) + $time) > time ()) {
+	if ((!defined ('WP_BLIP_DEBUG') || !WP_BLIP_DEBUG) && $time && file_exists ($cachefile) && (filemtime ($cachefile) + $time) > time ()) {
 		return unserialize (stripslashes (file_get_contents ($cachefile)));
 	}
 	else {
@@ -128,7 +140,7 @@ function wp_blip_cache ($login, $password, $quant=null, $time=null) {
 		require_once 'blipapi.php';
 		$bapi = new BlipApi ($login, $password);
 		$bapi->connect ();
-		$bapi->uagent = 'WP Blip!/0.3.1 (http://wp-blip.googlecode.com)';
+		$bapi->uagent = 'WP Blip!/0.3.2 (http://wp-blip.googlecode.com)';
 
 		$statuses = $bapi->status_read (null, null, array (), false, $quant);
 
@@ -144,7 +156,7 @@ function wp_blip_cache ($login, $password, $quant=null, $time=null) {
 			);
 		}
 
-		file_put_contents ($cachefile, serialize ($save), LOCK_EX);
+		@file_put_contents ($cachefile, serialize ($save), LOCK_EX);
 		return $save;
 	}
 }
