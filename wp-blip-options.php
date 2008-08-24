@@ -26,10 +26,10 @@ if (!$dateformat) {
 }
 ?>
 <div class="wrap">
+    <h2>WP-Blip!</h2>
 	<form method="post" action="options.php">
 		<?php wp_nonce_field('update-options') ?>
-		<p class="submit"><input type="submit" name="Submit" value="<?php _e('Update Options &raquo;') ?>" /></p>
-		<table class="niceblue">
+		<table class="form-table">
 			<tr valign="top">
 				<th scope="row"><label for="wp_blip_login">Login:</label></th>
 				<td><input type="text" name="wp_blip_login" id="wp_blip_login" value="<?php echo htmlentities2 (get_option ('wp_blip_login')) ?>" /><br />
@@ -65,9 +65,10 @@ if (!$dateformat) {
 				</td>
 			</tr>
 		</table>
-		<p class="submit"><input type="submit" name="Submit" value="<?php _e('Update Options &raquo;') ?>" /></p>
-
-		<input type="hidden" name="action" value="update" />
-		<input type="hidden" name="page_options" value="wp_blip_login,wp_blip_password,wp_blip_quant,wp_blip_time,wp_blip_tpl,wp_blip_dateformat" />
+		<p class="submit">
+            <input type="submit" name="Submit" value="<?php _e('Update Options &raquo;') ?>" />
+		    <input type="hidden" name="action" value="update" />
+		    <input type="hidden" name="page_options" value="wp_blip_login,wp_blip_password,wp_blip_quant,wp_blip_time,wp_blip_tpl,wp_blip_dateformat" />
+        </p>
 	</form>
 </div>
