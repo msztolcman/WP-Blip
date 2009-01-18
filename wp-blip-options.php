@@ -15,6 +15,11 @@ if (!$time) {
 	$time = 300;
 }
 
+$tags	= get_option ('wp_blip_tags');
+if (!$tags) {
+	$tags = '';
+}
+
 $tpl	= get_option ('wp_blip_tpl');
 if (!$tpl) {
 	$tpl = '<li>(%date) %body</li>';
@@ -50,6 +55,11 @@ if (!$dateformat) {
 					W sekundach</td>
 			</tr>
 			<tr valign="top">
+				<th scope="row"><label for="wp_blip_tags">Śledź tylko wymienione tagi:</label></th>
+				<td><input type="text" name="wp_blip_tags" id="wp_blip_tags" value="<?php echo htmlentities2 ($tags) ?>" /><br />
+					rozdzielaj poszczególne tagi znakiem spacji</td>
+			</tr>
+			<tr valign="top">
 				<th scope="row"><label for="wp_blip_tpl">Szablon wiadomości:</label></th>
 				<td><input type="text" name="wp_blip_tpl" id="wp_blip_tpl" value="<?php echo htmlentities2 ($tpl) ?>" size="50"/><br />
 					%url - zostanie zastąpione permalinkiem do statusu<br />
@@ -68,7 +78,7 @@ if (!$dateformat) {
 		<p class="submit">
             <input type="submit" name="Submit" value="<?php _e('Update Options &raquo;') ?>" />
 		    <input type="hidden" name="action" value="update" />
-		    <input type="hidden" name="page_options" value="wp_blip_login,wp_blip_password,wp_blip_quant,wp_blip_time,wp_blip_tpl,wp_blip_dateformat" />
+		    <input type="hidden" name="page_options" value="wp_blip_login,wp_blip_password,wp_blip_quant,wp_blip_time,wp_blip_tpl,wp_blip_dateformat,wp_blip_tags" />
         </p>
 	</form>
 </div>
