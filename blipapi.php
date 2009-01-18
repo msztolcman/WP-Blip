@@ -21,6 +21,7 @@
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License v.2
  * @package blipapi
  */
+if (!class_exists ('BlipApi')) {
 class BlipApi {
     /**
      * CURL handler
@@ -1328,6 +1329,7 @@ class BlipApi {
         return $this->__query ('/background', 'delete');
     }
 
+}
 }
 
 // vim: fdm=manual
