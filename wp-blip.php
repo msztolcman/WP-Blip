@@ -1,9 +1,9 @@
 <?php
 /*
  * Plugin Name: WP-Blip!
- * Plugin URI: http://repo.urzenia.net/PHP:WP-Blip!
- * Description: Wtyczka wyświetla ostatnie wpisy z <a href="http://blip.pl">blip.pl</a>.
- * Version: 0.3.2
+ * Plugin URI: http://wp-blip.googlecode.com
+ * Description: Wtyczka wyświetla ostatnie wpisy z <a href="http://blip.pl">blip.pl</a> (<a href="http://h2o.sztolcman.eu/wp-admin/options-general.php?page=WP-Blip">skonfiguruj</a>).
+ * Version: 0.4
  * Author: Marcin 'MySZ' Sztolcman
  * Author URI: http://urzenia.net/
  * SVNVersion: $Id$
@@ -12,11 +12,29 @@
 define ('WP_BLIP_DEBUG', false);
 $wp_blip_cacheroot = dirname (__FILE__);
 
+$wp_blip_plchars    =   "\xc4\x85\xc4\x84\xc4\x86\xc4\x87\xc4\x98\xc4\x99\xc5\x81\xc5\x82\xc5\x83".
+                        "\xc5\x84\xc5\x9a\xc5\x9b\xc5\xbb\xc5\xbc\xc5\xb9\xc5\xba\xc3\xb3\xc3\x93";
+function wp_blip_debug () {
+    $args = func_get_args ();
+    echo '<pre>';
+    foreach ($args as $arg) {
+        print_r ($arg);
+        echo "\n";
+    }
+    echo '</pre>';
+}
+
 if (
     (!is_dir ($wp_blip_cacheroot) || !is_writeable ($wp_blip_cacheroot)) &&
     function_exists ('sys_get_temp_dir')
 ) {
     $wp_blip_cacheroot = sys_get_temp_dir ();
+}
+
+function wp_blip_find_tags ($status) {
+    $status = str_replace (array ('-', '_'), '', $status);
+    preg_match_all ("!#([a-zA-Z0-9$wp_blip_plchars]+)!", $status, $statuses);
+    return $statuses[1];
 }
 
 function wp_blip ($join="\n", $echo=0) {
@@ -41,6 +59,11 @@ function wp_blip ($join="\n", $echo=0) {
 		$time	= 300;
 	}
 
+	$tags		= get_option ('wp_blip_tags');
+	if (!$tags) {
+		$tags	= '';
+	}
+
 	$dateformat	= get_option ('wp_blip_dateformat');
 	if (!$dateformat) {
 		$dateformat	= '%Y-%m-%d %H:%M:%S';
@@ -48,7 +71,7 @@ function wp_blip ($join="\n", $echo=0) {
 
 
 
-	$updates = wp_blip_cache ($login, $password, $quant, $time);
+	$updates = wp_blip_cache ($login, $password, $quant, $time, $tags);
 
 	$pat = array ('%date', '%body', '%url');
 	$ret = array ();
@@ -89,15 +112,13 @@ function wp_blip_linkify ($status, $opts = array ()) {
     if (!$status) {
         return $status;
     }
-    $plchars    =   "\xc4\x85\xc4\x84\xc4\x86\xc4\x87\xc4\x98\xc4\x99\xc5\x81\xc5\x82\xc5\x83".
-                    "\xc5\x84\xc5\x9a\xc5\x9b\xc5\xbb\xc5\xbc\xc5\xb9\xc5\xba\xc3\xb3\xc3\x93";
 
     if (!isset ($opts['wo_users']) || !$opts['wo_users']) {
-        $status = preg_replace ('#\^([-\w'.$plchars.']+)#', '<a href="http://$1.blip.pl/">^$1</a>', $status);
+        $status = preg_replace ('#\^([-\w'.$wp_blip_plchars.']+)#', '<a href="http://$1.blip.pl/">^$1</a>', $status);
     }
 
     if (!isset ($opts['wo_tags']) || !$opts['wo_tags']) {
-        $status = preg_replace ('/#([-\w'.$plchars.']+)/', '<a href="http://blip.pl/tags/$1">#$1</a>', $status);
+        $status = preg_replace ('/#([-\w'.$wp_blip_plchars.']+)/', '<a href="http://blip.pl/tags/$1">#$1</a>', $status);
     }
 
     if (!isset ($opts['wo_links']) || !$opts['wo_links']) {
@@ -107,7 +128,20 @@ function wp_blip_linkify ($status, $opts = array ()) {
     return $status;
 }
 
-function wp_blip_cache ($login, $password, $quant=null, $time=null) {
+function wp_blip_filter_statuses_by_tags ($tags, $statuses) {
+    foreach ($statuses as $status) {
+        foreach (wp_blip_find_tags ($status->body) as $tag) {
+            if (in_array ($tag, $tags)) {
+                $filtered[] = $status;
+                continue 2;
+            }
+        }
+    }
+
+    return $filtered;
+}
+
+function wp_blip_cache ($login, $password, $quant=null, $time=null, $tags=null) {
 	if (!$login || !$password) {
 		return false;
 	}
@@ -116,6 +150,9 @@ function wp_blip_cache ($login, $password, $quant=null, $time=null) {
 	}
 	if (is_null ($time) || $time < 0) {
 		$time = 300;
+	}
+	if (is_null ($tags) || $tags < 0) {
+		$tags = '';
 	}
 
     if (!is_dir ($GLOBALS['wp_blip_cacheroot']) || !is_writeable ($GLOBALS['wp_blip_cacheroot'])) {
@@ -140,14 +177,43 @@ function wp_blip_cache ($login, $password, $quant=null, $time=null) {
 		require_once 'blipapi.php';
 		$bapi = new BlipApi ($login, $password);
 		$bapi->connect ();
-		$bapi->uagent = 'WP Blip!/0.3.2 (http://wp-blip.googlecode.com)';
+		$bapi->uagent = 'WP Blip!/0.4 (http://wp-blip.googlecode.com)';
 
+        ## pobieramy statusy
 		$statuses = $bapi->status_read (null, null, array (), false, $quant);
+
+        ## jeśli filtrujemy po tagach:
+        if ($tags) {
+            ## rozdzielamy tagi
+            $tags = preg_split ('!\s!', $tags);
+
+            ## odfiltrowujemy niechciane statusy
+            $statuses = wp_blip_filter_statuses_by_tags ($tags, $statuses['body']);
+
+            ## szukamy pozostałych statusów jeśli trzeba
+            $offset = $quant;
+            while (count ($statuses) < $quant) {
+		        $filtered = $bapi->status_read (null, null, array (), false, 20, $offset);
+                $filtered = wp_blip_filter_statuses_by_tags ($tags, $filtered['body']);
+                if (count ($filtered)) {
+                    $statuses = array_merge ($statuses, $filtered);
+                }
+                $offset += 20;
+            }
+
+            ## jak za dużo to ucinamy nadmiarowe statusy
+            if (count ($statuses) > $quant) {
+                $statuses = array_splice ($statuses, 0, $quant);
+            }
+        }
+        else {
+            $statuses = $statuses['body'];
+        }
 
 		unset ($bapi);
 
 		$save = array ();
-		foreach ($statuses['body'] as $status) {
+		foreach ($statuses as $status) {
             $date = preg_split ('#[: -]#', $status->created_at);
 			$save[] = array (
 				'created_at'	=> mktime ($date[3], $date[4], $date[5], $date[1], $date[2], $date[0]),
