@@ -3,7 +3,7 @@
  * Plugin Name: WP-Blip!
  * Plugin URI: http://wp-blip.googlecode.com
  * Description: Wtyczka wyświetla ostatnie wpisy z <a href="http://blip.pl">blip.pl</a> (<a href="http://h2o.sztolcman.eu/wp-admin/options-general.php?page=WP-Blip">skonfiguruj</a>).
- * Version: 0.4.2
+ * Version: 0.4.3
  * Author: Marcin 'MySZ' Sztolcman
  * Author URI: http://urzenia.net/
  * SVNVersion: $Id$
@@ -167,7 +167,7 @@ function wp_blip_cache () {
 		require_once 'blipapi.php';
 		$bapi = new BlipApi ($options['login'], $options['password']);
 		$bapi->connect ();
-		$bapi->uagent = 'WP Blip!/0.4 (http://wp-blip.googlecode.com)';
+		$bapi->uagent = 'WP Blip!/0.4.3 (http://wp-blip.googlecode.com)';
 
         ## pobieramy statusy
 		$statuses = $bapi->status_read (null, null, array (), false, $options['quant']);
