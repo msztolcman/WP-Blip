@@ -237,7 +237,7 @@ function wp_blip_linkify__linked_statuses ($status) {
         $st_data    = $bapi->status_read ($status[3]);
         if ($st_data['status_code'] == 200) {
             $title = explode ('/', $st_data['body']->user_path);
-            $title = htmlentities ('^'. $title[2] .': '. $st_data['body']->body);
+            $title = htmlspecialchars ('^'. $title[2] .': '. $st_data['body']->body);
         }
     }
 
