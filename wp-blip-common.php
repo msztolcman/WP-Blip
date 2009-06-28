@@ -89,7 +89,7 @@ function wp_blip_cache () {
 		require_once 'blipapi.php';
 		$bapi = new BlipApi ();
 		$bapi->connect ();
-		$bapi->uagent = 'WP Blip!/0.4.6 (http://wp-blip.googlecode.com)';
+		$bapi->uagent = 'WP Blip!/0.4.7 (http://wp-blip.googlecode.com)';
 
         ## pobieramy statusy
 		$statuses = $bapi->status_read (null, $options['login'], array (), false, $options['quant']);
@@ -105,7 +105,7 @@ function wp_blip_cache () {
             ## szukamy pozostałych statusów jeśli trzeba
             $offset = $options['quant'];
             while (count ($statuses) < $options['quant']) {
-		        $filtered = $bapi->status_read (null, null, array (), false, 20, $offset);
+		        $filtered = $bapi->status_read (null, $options['login'], array (), false, 20, $offset);
                 $filtered = wp_blip_filter_statuses_by_tags ($options['tags'], $filtered['body']);
                 if (count ($filtered)) {
                     $statuses = array_merge ($statuses, $filtered);
@@ -209,6 +209,10 @@ function wp_blip_linkify ($status, $opts = array ()) {
         return $status;
     }
 
+    if (!isset ($opts['wo_blip']) || !$opts['wo_blip']) {
+        $status = preg_replace ('#(https?://(?:www\.)?blip\.pl/[/a-zA-Z0-9]+)#', '<a href="$1">$1</a>', $status);
+    }
+
     if (!isset ($opts['wo_users']) || !$opts['wo_users']) {
         $status = preg_replace ('#\^([-\w'.$wp_blip_plchars.']+)#', '<a href="http://$1.blip.pl/">^$1</a>', $status);
     }
@@ -219,10 +223,6 @@ function wp_blip_linkify ($status, $opts = array ()) {
 
     if (!isset ($opts['wo_links']) || !$opts['wo_links']) {
         $status = preg_replace ('#(https?://rdir\.pl/[a-zA-Z0-9]+)#', '<a href="$1">$1</a>', $status);
-    }
-
-    if (!isset ($opts['wo_blip']) || !$opts['wo_blip']) {
-        $status = preg_replace ('#(https?://(?:www\.)?blip\.pl/[/a-zA-Z0-9]+)#', '<a href="$1">$1</a>', $status);
     }
 
     return $status;

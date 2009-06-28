@@ -3,13 +3,13 @@ Contributors: mysz
 Tags: blip, microblogging
 Requires at least: 2.7
 Tested up to: 2.8
-Stable tag: 0.4.6
+Stable tag: 0.4.7
 
 WP-Blip! służy do wyświetlania ostatnich wpisów z Blip!a w Wordpressie.
 
 == Description ==
 
-WP-Blip! pozwala na wyświetlenie ostatnich wpisów z [BlipLoga](http://blip.pl).
+WP-Blip! pozwala na wyświetlenie ostatnich wpisów z BlipLoga.
 Można wyświetlać wszystkie wpisy, lub też ograniczone do dowolnego tagu. Udostępniony jest w części administracyjnej panel pozwalający na dowolną konfigurację sposoby wyświetlanych danyc, ich ilości czy innych limitów.
 
 Proszę o zgłaszanie wszelkich uwag i problemów na tagu [#wpblip](http://blip.pl/tags/wpblip) lub do użytkownika [^mysz](http://blip.pl/users/mysz/dashboard), ewentualnie można zgłosić ticketa w [Google Code](http://code.google.com/p/wp-blip/issues/list).
@@ -20,9 +20,9 @@ Proszę o zgłaszanie wszelkich uwag i problemów na tagu [#wpblip](http://blip.
 2. Przejdź do panelu administracyjnego, i aktywuj wtyczkę.
 3. W Ustawieniach -> WP-Blip! możesz skonfigurować sposób działania wtyczki.
 4. W szablonie, w miejscu w którym ma się wyświetlić lista wpisów, dodaj kod:
-`<?php
+<?php
 if (function_exists ('wp_blip')) { wp_blip("\n", 1); }
-?>`
+?>
 
 == Frequently Asked Questions ==
 
@@ -34,6 +34,10 @@ Proszę o zgłaszanie wszelkich uwag i problemów na tagu [#wpblip](http://blip.
 1. Panel administracyjny
 
 == Changelog ==
+= 0.4.7 =
+* Poprawki błędów:
+** Błędy przy pobieraniu statusów przy ograniczeniu dla konkretnych tagów
+** Błędnie linkował adresy inne niz blip.pl - zła kolejność podmieniania adresów
 = 0.4.6 =
 * nie jest już potrzebne podawanie hasła do Blip!a
 * można wyświetlać wpisy dowolnego usera
