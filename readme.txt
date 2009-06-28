@@ -3,7 +3,7 @@ Contributors: mysz
 Tags: blip, microblogging
 Requires at least: 2.7
 Tested up to: 2.8
-Stable tag: 0.4.4
+Stable tag: 0.4.5
 
 WP-Blip! służy do wyświetlania ostatnich wpisów z Blip!a w Wordpressie.
 
@@ -34,6 +34,9 @@ Proszę o zgłaszanie wszelkich uwag i problemów na tagu [#wpblip](http://blip.
 1. Panel administracyjny
 
 == Changelog ==
+= 0.4.5 = 
+* wykrywanie i linkowanie urli do innych wiadomosci na blipie - nie sa one puszczane przez rdir.pl
+* rozpoznawanie linkow https
 = 0.4.4 =
 * możliwość wyczyszczenia cache z poziomu panelu
 * możliwość zdefiniowania treści przed i za listą statusów

@@ -92,7 +92,7 @@ function wp_blip_cache () {
 		require_once 'blipapi.php';
 		$bapi = new BlipApi ($options['login'], $options['password']);
 		$bapi->connect ();
-		$bapi->uagent = 'WP Blip!/0.4.4 (http://wp-blip.googlecode.com)';
+		$bapi->uagent = 'WP Blip!/0.4.5 (http://wp-blip.googlecode.com)';
 
         ## pobieramy statusy
 		$statuses = $bapi->status_read (null, null, array (), false, $options['quant']);
