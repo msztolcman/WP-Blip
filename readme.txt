@@ -30,14 +30,21 @@ if (function_exists ('wp_blip')) { wp_blip("\n", 1); }
 
 Proszę o zgłaszanie wszelkich uwag i problemów na tagu [#wpblip](http://blip.pl/tags/wpblip) lub do użytkownika [^mysz](http://blip.pl/users/mysz/dashboard), ewentualnie można zgłosić ticketa w [Google Code](http://code.google.com/p/wp-blip/issues/list).
 
+= Czemu włączenie rozwijania linków statusów lub linków z serwisu rdir.pl spowalnia ładowanie? =
+
+Ponieważ dla każdego linku z osobna trzeba pobrać dodatkowe dane z serwisu Blip!
+
 == Screenshots ==
 1. Panel administracyjny
 
 == Changelog ==
 = 0.4.7 =
+* mozliwosc wlaczenia rozwijania linkow z rdir.pl
+* mozliwosc wlaczenia pobierania podlinkowanych statusow i wyswietlanie ich w title linku (po przytrzymaniu kursora nad odnośnikiem)
 * Poprawki błędów:
 ** Błędy przy pobieraniu statusów przy ograniczeniu dla konkretnych tagów
 ** Błędnie linkował adresy inne niz blip.pl - zła kolejność podmieniania adresów
+** w treści wpisów nie były enkodowane znaki wrażliwe dla HTML
 = 0.4.6 =
 * nie jest już potrzebne podawanie hasła do Blip!a
 * można wyświetlać wpisy dowolnego usera
@@ -49,7 +56,7 @@ Proszę o zgłaszanie wszelkich uwag i problemów na tagu [#wpblip](http://blip.
 * możliwość zdefiniowania treści przed i za listą statusów
 * porządki w kodzie i w układzie plików
 
-== Requirements ==
+== Wymagania ==
 * PHP w wersji 5.2 lub wyżej
 * działające rozszerzenie PHP curl
 
