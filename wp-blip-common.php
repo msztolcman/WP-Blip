@@ -205,7 +205,7 @@ function wp_blip_get_options () {
 }
 
 function wp_blip_linkify ($status, $opts = array ()) {
-    if (!$status) {
+    if (!$status || gettype ($status) != 'string') {
         return $status;
     }
 
@@ -218,7 +218,11 @@ function wp_blip_linkify ($status, $opts = array ()) {
     }
 
     if (!isset ($opts['wo_links']) || !$opts['wo_links']) {
-        $status = preg_replace ('#(http://rdir\.pl/[a-zA-Z0-9]+)#', '<a href="$1">$1</a>', $status);
+        $status = preg_replace ('#(https?://rdir\.pl/[a-zA-Z0-9]+)#', '<a href="$1">$1</a>', $status);
+    }
+
+    if (!isset ($opts['wo_blip']) || !$opts['wo_blip']) {
+        $status = preg_replace ('#(https?://(?:www\.)?blip\.pl/[/a-zA-Z0-9]+)#', '<a href="$1">$1</a>', $status);
     }
 
     return $status;
