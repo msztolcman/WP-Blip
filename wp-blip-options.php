@@ -17,7 +17,7 @@ $wp_blip_options = wp_blip_get_options ();
 		<?php wp_nonce_field('update-options') ?>
 		<table class="form-table">
 			<tr valign="top">
-				<th scope="row"><label for="wp_blip_login">Użytkownik w seriwsie <a href="http://blip.pl">Blip!</a>:</label></th>
+				<th scope="row"><label for="wp_blip_login">Użytkownik w serwisie <a href="http://blip.pl">Blip!</a>:</label></th>
 				<td><input type="text" name="wp_blip_login" id="wp_blip_login" value="<?php echo htmlentities2 (get_option ('wp_blip_login')) ?>" />
 				</td>
 			</tr>
@@ -38,7 +38,7 @@ $wp_blip_options = wp_blip_get_options ();
 			<tr valign="top">
 				<th scope="row"><label for="wp_blip_tpl_container_pre">Przed listą statusów wstaw:</label></th>
 				<td><input type="text" name="wp_blip_tpl_container_pre" id="wp_blip_tpl_container_pre" value="<?php echo htmlentities2 ($wp_blip_options['tpl_container_pre']) ?>" size="50"/><br />
-					Przykład: &lt;ul class="blip_log"&gt;
+					Przykład: &lt;ul class=&quot;blip_log&quot;&gt;
 				</td>
 			</tr>
 			<tr valign="top">
@@ -63,6 +63,34 @@ $wp_blip_options = wp_blip_get_options ();
 				</td>
 			</tr>
 			<tr valign="top">
+				<th scope="row">Rozwiń linki <code>rdir.pl</code>:</th>
+                <td>
+                    <label for="wp_blip_expand_rdir_yes"><input
+                        type="radio" name="wp_blip_expand_rdir" id="wp_blip_expand_rdir_yes" value="1"
+                        <?php echo $wp_blip_options['expand_rdir'] ? 'checked="checked"' : ''; ?>
+                        /> rozwiń</label>
+                    <label for="wp_blip_expand_rdir_no"><input
+                        type="radio" name="wp_blip_expand_rdir" id="wp_blip_expand_rdir_no" value="0"
+                        <?php echo $wp_blip_options['expand_rdir'] ? '' : 'checked="checked"'; ?>
+                        /> nie rozwijaj</label><br />
+                    Rozwijanie linków nieco spowalnia pobieranie listy statusów.
+				</td>
+			</tr>
+			<tr valign="top">
+				<th scope="row">Wczytaj linkowane statusy:</th>
+                <td>
+                    <label for="wp_blip_expand_linked_statuses_yes"><input
+                        type="radio" name="wp_blip_expand_linked_statuses" id="wp_blip_expand_linked_statuses_yes" value="1"
+                        <?php echo $wp_blip_options['expand_linked_statuses'] ? 'checked="checked"' : ''; ?>
+                        /> wczytaj</label>
+                    <label for="wp_blip_expand_linked_statuses_no"><input
+                        type="radio" name="wp_blip_expand_linked_statuses" id="wp_blip_expand_linked_statuses_no" value="0"
+                        <?php echo $wp_blip_options['expand_linked_statuses'] ? '' : 'checked="checked"'; ?>
+                        /> nie wczytuj</label><br />
+                    Wczytywanie linkowanych statusów nieco spowalnia pobieranie listy statusów.
+				</td>
+			</tr>
+			<tr valign="top">
 				<th scope="row">Wyczyść cache:</th>
                 <td><a href="<?php echo get_bloginfo('wpurl'); ?>/wp-content/plugins/wp-blip/wp-blip-ajax.php?ajax=1&amp;action=cache_invalidate"
                     onclick="jQuery.get (this.href, {}, function (d, s) {alert (d);}); return false">wyczyść</a></td>
@@ -71,7 +99,7 @@ $wp_blip_options = wp_blip_get_options ();
 		<p class="submit">
             <input type="submit" class="button-primary" value="<?php _e('Save Changes') ?>" />
 		    <input type="hidden" name="action" value="update" />
-		    <input type="hidden" name="page_options" value="wp_blip_login,wp_blip_quant,wp_blip_time,wp_blip_tpl,wp_blip_dateformat,wp_blip_tags,wp_blip_tpl_container_pre,wp_blip_tpl_container_post" />
+		    <input type="hidden" name="page_options" value="wp_blip_login,wp_blip_quant,wp_blip_time,wp_blip_tpl,wp_blip_dateformat,wp_blip_tags,wp_blip_tpl_container_pre,wp_blip_tpl_container_post,wp_blip_expand_rdir,wp_blip_expand_linked_statuses" />
         </p>
 	</form>
 </div>

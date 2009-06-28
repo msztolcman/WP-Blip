@@ -51,17 +51,30 @@ function wp_blip ($join="\n", $echo=0) {
 		return $ret;
 	}
 
-	$ret = join ($join, $ret);
-    if ($options['tpl_container_pre'] !== false) {
-        $ret = $options['tpl_container_pre'] . $ret;
-    }
-    if ($options['tpl_container_post'] !== false) {
-        $ret .= $options['tpl_container_post'];
-    }
+    $ret =
+        $options['tpl_container_pre'] .
+        join ($join, $ret) .
+        $options['tpl_container_post'];
+
 	if ($echo) {
 		echo $ret;
 	}
+
 	return $ret;
+}
+
+function wp_blip_connect () {
+    static $bapi;
+
+    if (is_null ($bapi)) {
+		require_once 'blipapi.php';
+		$bapi = new BlipApi ();
+		$bapi->connect ();
+		$bapi->uagent = 'WP Blip!/0.4.7 (http://wp-blip.googlecode.com)';
+
+    }
+
+    return $bapi;
 }
 
 function wp_blip_cache () {
@@ -86,10 +99,7 @@ function wp_blip_cache () {
 			update_option ('wp_blip_quant', $options['quant']);
 		}
 
-		require_once 'blipapi.php';
-		$bapi = new BlipApi ();
-		$bapi->connect ();
-		$bapi->uagent = 'WP Blip!/0.4.7 (http://wp-blip.googlecode.com)';
+        $bapi = wp_blip_connect ();
 
         ## pobieramy statusy
 		$statuses = $bapi->status_read (null, $options['login'], array (), false, $options['quant']);
@@ -122,14 +132,18 @@ function wp_blip_cache () {
             $statuses = $statuses['body'];
         }
 
-		unset ($bapi);
-
 		$save = array ();
 		foreach ($statuses as $status) {
             $date = preg_split ('#[: -]#', $status->created_at);
 			$save[] = array (
 				'created_at'	=> mktime ($date[3], $date[4], $date[5], $date[1], $date[2], $date[0]),
-				'body'			=> wp_blip_linkify ($status->body),
+                'body'			=> wp_blip_linkify (
+                    htmlspecialchars ($status->body),
+                    array (
+                        'expand_rdir'               => $options['expand_rdir'],
+                        'expand_linked_statuses'    => $options['expand_linked_statuses'],
+                    )
+                ),
 				'id'			=> $status->id,
 			);
 		}
@@ -179,14 +193,16 @@ function wp_blip_get_options () {
 
     if (is_null ($options)) {
         $options = array (
-            'login'                 => '',
-            'quant'                 => 10,
-            'tpl'                   => '<li>(%date) %body</li>',
-            'time'                  => 300,
-            'tags'                  => '',
-            'dateformat'            => '%Y-%m-%d %H:%M:%S',
-            'tpl_container_pre'     => '<ul>',
-            'tpl_container_post'    => '</ul>',
+            'login'                     => '',
+            'quant'                     => 10,
+            'tpl'                       => '<li>(%date) %body</li>',
+            'time'                      => 300,
+            'tags'                      => '',
+            'dateformat'                => '%Y-%m-%d %H:%M:%S',
+            'tpl_container_pre'         => '<ul>',
+            'tpl_container_post'        => '</ul>',
+            'expand_rdir'               => false,
+            'expand_linked_statuses'    => false,
         );
 
         foreach ($options as $option => &$default) {
@@ -204,17 +220,46 @@ function wp_blip_get_options () {
     return $options;
 }
 
+function wp_blip_linkify__rdir ($link) {
+    $bapi       = wp_blip_connect ();
+    $link_data  = $bapi->shortlink_read ($link[2]);
+    if ($link_data['status_code'] == 200) {
+        $link[1] = $link_data['body']->original_link;
+    }
+
+    return '<a href="'.$link[1].'" title="'.$link[1].'">'.$link[1].'</a>';
+}
+
+function wp_blip_linkify__linked_statuses ($status) {
+    $title = '';
+    if ($status[2] == 's') {
+        $bapi       = wp_blip_connect ();
+        $st_data    = $bapi->status_read ($status[3]);
+        if ($st_data['status_code'] == 200) {
+            $title = explode ('/', $st_data['body']->user_path);
+            $title = htmlentities ('^'. $title[2] .': '. $st_data['body']->body);
+        }
+    }
+
+    return '<a href="'.$status[1].'" title="'. $title .'">'.$status[1].'</a>';
+}
+
 function wp_blip_linkify ($status, $opts = array ()) {
     if (!$status || gettype ($status) != 'string') {
         return $status;
     }
 
-    if (!isset ($opts['wo_blip']) || !$opts['wo_blip']) {
-        $status = preg_replace ('#(https?://(?:www\.)?blip\.pl/[/a-zA-Z0-9]+)#', '<a href="$1">$1</a>', $status);
-    }
-
     if (!isset ($opts['wo_users']) || !$opts['wo_users']) {
         $status = preg_replace ('#\^([-\w'.$wp_blip_plchars.']+)#', '<a href="http://$1.blip.pl/">^$1</a>', $status);
+    }
+
+    if (!isset ($opts['wo_blip']) || !$opts['wo_blip']) {
+        if (isset ($opts['expand_linked_statuses']) && $opts['expand_linked_statuses']) {
+            $status = preg_replace_callback ('#(https?://(?:www\.)?blip\.pl/([a-z]+)/([a-zA-Z0-9]+))#', 'wp_blip_linkify__linked_statuses', $status);
+        }
+        else {
+            $status = preg_replace ('#(https?://(?:www\.)?blip\.pl/[/a-zA-Z0-9]+)#', '<a href="$1">$1</a>', $status);
+        }
     }
 
     if (!isset ($opts['wo_tags']) || !$opts['wo_tags']) {
@@ -222,7 +267,12 @@ function wp_blip_linkify ($status, $opts = array ()) {
     }
 
     if (!isset ($opts['wo_links']) || !$opts['wo_links']) {
-        $status = preg_replace ('#(https?://rdir\.pl/[a-zA-Z0-9]+)#', '<a href="$1">$1</a>', $status);
+        if (isset ($opts['expand_rdir']) && $opts['expand_rdir']) {
+            $status = preg_replace_callback ('#(https?://rdir\.pl/([a-zA-Z0-9]+))#', 'wp_blip_linkify__rdir', $status);
+        }
+        else {
+            $status = preg_replace ('#(https?://rdir\.pl/([a-zA-Z0-9]+))#', '<a href="$1">$1</a>', $status);
+        }
     }
 
     return $status;
