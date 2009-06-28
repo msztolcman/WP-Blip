@@ -17,14 +17,9 @@ $wp_blip_options = wp_blip_get_options ();
 		<?php wp_nonce_field('update-options') ?>
 		<table class="form-table">
 			<tr valign="top">
-				<th scope="row"><label for="wp_blip_login">Login:</label></th>
-				<td><input type="text" name="wp_blip_login" id="wp_blip_login" value="<?php echo htmlentities2 (get_option ('wp_blip_login')) ?>" /><br />
-					Twój login w serwisie <a href="http://blip.pl/">Blip!</a>
+				<th scope="row"><label for="wp_blip_login">Użytkownik w seriwsie <a href="http://blip.pl">Blip!</a>:</label></th>
+				<td><input type="text" name="wp_blip_login" id="wp_blip_login" value="<?php echo htmlentities2 (get_option ('wp_blip_login')) ?>" />
 				</td>
-			</tr>
-			<tr valign="top">
-				<th scope="row"><label for="wp_blip_password">Hasło:</label></th>
-				<td><input type="password" name="wp_blip_password" id="wp_blip_password" value="<?php echo htmlentities2 (get_option ('wp_blip_password')) ?>" /></td>
 			</tr>
 			<tr valign="top">
 				<th scope="row"><label for="wp_blip_quant">Ilość statusów do pobrania:</label></th>
@@ -76,7 +71,7 @@ $wp_blip_options = wp_blip_get_options ();
 		<p class="submit">
             <input type="submit" class="button-primary" value="<?php _e('Save Changes') ?>" />
 		    <input type="hidden" name="action" value="update" />
-		    <input type="hidden" name="page_options" value="wp_blip_login,wp_blip_password,wp_blip_quant,wp_blip_time,wp_blip_tpl,wp_blip_dateformat,wp_blip_tags,wp_blip_tpl_container_pre,wp_blip_tpl_container_post" />
+		    <input type="hidden" name="page_options" value="wp_blip_login,wp_blip_quant,wp_blip_time,wp_blip_tpl,wp_blip_dateformat,wp_blip_tags,wp_blip_tpl_container_pre,wp_blip_tpl_container_post" />
         </p>
 	</form>
 </div>

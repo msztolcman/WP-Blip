@@ -29,7 +29,7 @@ function wp_blip_debug () {
 
 function wp_blip ($join="\n", $echo=0) {
     $options = wp_blip_get_options ();
-	if (!$options['login'] || !$options['password']) {
+	if (!$options['login']) {
 		return false;
 	}
 
@@ -66,7 +66,7 @@ function wp_blip ($join="\n", $echo=0) {
 
 function wp_blip_cache () {
     $options = wp_blip_get_options ();
-	if (!$options['login'] || !$options['password']) {
+	if (!$options['login']) {
 		return false;
 	}
 
@@ -81,21 +81,18 @@ function wp_blip_cache () {
 		return unserialize (stripslashes (file_get_contents ($cachefile)));
 	}
 	else {
-		if (!$options['login'] || !$options['password']) {
-			return false;
-		}
 		if (!$options['quant']) {
 			$options['quant'] = 10;
 			update_option ('wp_blip_quant', $options['quant']);
 		}
 
 		require_once 'blipapi.php';
-		$bapi = new BlipApi ($options['login'], $options['password']);
+		$bapi = new BlipApi ();
 		$bapi->connect ();
-		$bapi->uagent = 'WP Blip!/0.4.5 (http://wp-blip.googlecode.com)';
+		$bapi->uagent = 'WP Blip!/0.4.6 (http://wp-blip.googlecode.com)';
 
         ## pobieramy statusy
-		$statuses = $bapi->status_read (null, null, array (), false, $options['quant']);
+		$statuses = $bapi->status_read (null, $options['login'], array (), false, $options['quant']);
 
         ## jeśli filtrujemy po tagach:
         if ($options['tags']) {
@@ -183,7 +180,6 @@ function wp_blip_get_options () {
     if (is_null ($options)) {
         $options = array (
             'login'                 => '',
-            'password'              => '',
             'quant'                 => 10,
             'tpl'                   => '<li>(%date) %body</li>',
             'time'                  => 300,
@@ -198,6 +194,10 @@ function wp_blip_get_options () {
             if ($value !== false) {
                 $default = $value;
             }
+        }
+
+        if (get_option ('wp_blip_password') !== false) {
+            delete_option ('wp_blip_password');
         }
     }
 
