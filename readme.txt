@@ -3,7 +3,7 @@ Contributors: mysz
 Tags: blip, microblogging
 Requires at least: 2.7
 Tested up to: 2.8
-Stable tag: 0.4.7
+Stable tag: 0.4.8
 
 WP-Blip! służy do wyświetlania ostatnich wpisów z Blip!a w Wordpressie.
 
@@ -38,25 +38,24 @@ Ponieważ dla każdego linku z osobna trzeba pobrać dodatkowe dane z serwisu Bl
 1. Panel administracyjny
 
 == Changelog ==
+= 0.4.8 =
+* w niektórych sytuacjach sypało się rozwijanie linków i nazw userów
 = 0.4.7 =
-* mozliwosc wlaczenia rozwijania linkow z rdir.pl
-* mozliwosc wlaczenia pobierania podlinkowanych statusow i wyswietlanie ich w title linku (po przytrzymaniu kursora nad odnośnikiem)
-* Poprawki błędów:
-** Błędy przy pobieraniu statusów przy ograniczeniu dla konkretnych tagów
-** Błędnie linkował adresy inne niz blip.pl - zła kolejność podmieniania adresów
+* możliwość włączenia rozwijania linków z rdir.pl
+* możliwość włączenia pobierania podlinkowanych statusów i wyświetlanie ich w title linku (po przytrzymaniu kursora nad odnośnikiem)
+* poprawki błędów:
+** błędy przy pobieraniu statusów przy ograniczeniu dla konkretnych tagów
+** błędnie linkował adresy inne niż blip.pl - zła kolejność podmieniania adresów
 ** w treści wpisów nie były enkodowane znaki wrażliwe dla HTML
 = 0.4.6 =
 * nie jest już potrzebne podawanie hasła do Blip!a
 * można wyświetlać wpisy dowolnego usera
 = 0.4.5 = 
-* wykrywanie i linkowanie urli do innych wiadomosci na blipie - nie sa one puszczane przez rdir.pl
+* wykrywanie i linkowanie urli do innych wiadomości na blipie - nie są one puszczane przez rdir.pl
 * rozpoznawanie linkow https
 = 0.4.4 =
 * możliwość wyczyszczenia cache z poziomu panelu
 * możliwość zdefiniowania treści przed i za listą statusów
 * porządki w kodzie i w układzie plików
 
-== Wymagania ==
-* PHP w wersji 5.2 lub wyżej
-* działające rozszerzenie PHP curl
-
+== Wym

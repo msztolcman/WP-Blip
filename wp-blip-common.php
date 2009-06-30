@@ -70,7 +70,7 @@ function wp_blip_connect () {
 		require_once 'blipapi.php';
 		$bapi = new BlipApi ();
 		$bapi->connect ();
-		$bapi->uagent = 'WP Blip!/0.4.7 (http://wp-blip.googlecode.com)';
+		$bapi->uagent = 'WP Blip!/0.4.8 (http://wp-blip.googlecode.com)';
 
     }
 
@@ -220,28 +220,50 @@ function wp_blip_get_options () {
     return $options;
 }
 
-function wp_blip_linkify__rdir ($link) {
-    $bapi       = wp_blip_connect ();
-    $link_data  = $bapi->shortlink_read ($link[2]);
-    if ($link_data['status_code'] == 200) {
-        $link[1] = $link_data['body']->original_link;
+function wp_blip_linkify__callback ($match) {
+    $opts = wp_blip_get_options ();
+
+    if ($match[0][0] == '^') {
+        return '<a href="http://'. substr ($match[0], 1) .'.blip.pl/">'. $match[0] .'</a>';
     }
+    else if ($match[0][0] == '#') {
+        return '<a href="http://blip.pl/tags/'. substr ($match[0], 1) .'">'. $match[0] .'</a>';
+    }
+    else if (!isset ($match[1])) {
+        return $match[0];
+    }
+    else if (substr ($match[1], 0, 4) == 'rdir') {
+        $link_href = $match[0];
 
-    return '<a href="'.$link[1].'" title="'.$link[1].'">'.$link[1].'</a>';
-}
+        if ($opts['expand_rdir']) {
+            $link       = explode ('/', $match[1]);
 
-function wp_blip_linkify__linked_statuses ($status) {
-    $title = '';
-    if ($status[2] == 's') {
-        $bapi       = wp_blip_connect ();
-        $st_data    = $bapi->status_read ($status[3]);
-        if ($st_data['status_code'] == 200) {
-            $title = explode ('/', $st_data['body']->user_path);
-            $title = htmlspecialchars ('^'. $title[2] .': '. $st_data['body']->body);
+            $bapi       = wp_blip_connect ();
+            $link_data  = $bapi->shortlink_read ($link[1]);
+            if ($link_data['status_code'] == 200) {
+                $link_href = $link_data['body']->original_link;
+            }
         }
+
+        return '<a href="'.$link_href.'" title="'.$match[0].'">'.$link_href.'</a>';
+    }
+    else if (substr ($match[1], 0, 4) == 'blip') {
+        $link       = explode ('/', $match[1]);
+        $title      = '';
+
+        if ($opts['expand_linked_statuses'] && $link[1] == 's') {
+            $bapi       = wp_blip_connect ();
+            $st_data    = $bapi->status_read ($link[2]);
+            if ($st_data['status_code'] == 200) {
+                $title = explode ('/', $st_data['body']->user_path);
+                $title = htmlspecialchars ('^'. $title[2] .': '. $st_data['body']->body);
+            }
+        }
+
+        return '<a href="'.$match[0].'" title="'. $title .'">'.$match[0].'</a>';
     }
 
-    return '<a href="'.$status[1].'" title="'. $title .'">'.$status[1].'</a>';
+    return $match[0];
 }
 
 function wp_blip_linkify ($status, $opts = array ()) {
@@ -249,31 +271,25 @@ function wp_blip_linkify ($status, $opts = array ()) {
         return $status;
     }
 
-    if (!isset ($opts['wo_users']) || !$opts['wo_users']) {
-        $status = preg_replace ('#\^([-\w'.$wp_blip_plchars.']+)#', '<a href="http://$1.blip.pl/">^$1</a>', $status);
-    }
-
-    if (!isset ($opts['wo_blip']) || !$opts['wo_blip']) {
-        if (isset ($opts['expand_linked_statuses']) && $opts['expand_linked_statuses']) {
-            $status = preg_replace_callback ('#(https?://(?:www\.)?blip\.pl/([a-z]+)/([a-zA-Z0-9]+))#', 'wp_blip_linkify__linked_statuses', $status);
-        }
-        else {
-            $status = preg_replace ('#(https?://(?:www\.)?blip\.pl/[/a-zA-Z0-9]+)#', '<a href="$1">$1</a>', $status);
-        }
-    }
-
-    if (!isset ($opts['wo_tags']) || !$opts['wo_tags']) {
-        $status = preg_replace ('/#([-\w'.$wp_blip_plchars.']+)/', '<a href="http://blip.pl/tags/$1">#$1</a>', $status);
-    }
-
-    if (!isset ($opts['wo_links']) || !$opts['wo_links']) {
-        if (isset ($opts['expand_rdir']) && $opts['expand_rdir']) {
-            $status = preg_replace_callback ('#(https?://rdir\.pl/([a-zA-Z0-9]+))#', 'wp_blip_linkify__rdir', $status);
-        }
-        else {
-            $status = preg_replace ('#(https?://rdir\.pl/([a-zA-Z0-9]+))#', '<a href="$1">$1</a>', $status);
-        }
-    }
+    $status = preg_replace_callback (
+        '!
+        (?:
+            (?:
+                https?://
+                (?:www.)?
+                (
+                    blip\.pl/[a-z0-9_-]+/[a-z0-9_-]+
+                    |
+                    rdir\.pl/[a-z0-9_-]+
+                )
+            )
+            |
+            (?:[#^][a-z0-9_'.$wp_blip_plchars.'-]+)
+        )
+        !xi',
+        'wp_blip_linkify__callback',
+        $status
+    );
 
     return $status;
 }
