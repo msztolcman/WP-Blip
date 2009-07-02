@@ -6,7 +6,9 @@
  * $Id$
  */
 
-$wp_blip_cacheroot = dirname (__FILE__);
+set_include_path (get_include_path() . PATH_SEPARATOR . dirname (__FILE__));
+
+$wp_blip_cacheroot  = dirname (__FILE__);
 if (
     (!is_dir ($wp_blip_cacheroot) || !is_writeable ($wp_blip_cacheroot)) &&
     function_exists ('sys_get_temp_dir')
@@ -14,8 +16,18 @@ if (
     $wp_blip_cacheroot = sys_get_temp_dir ();
 }
 
-$wp_blip_plchars    =   "\xc4\x85\xc4\x84\xc4\x86\xc4\x87\xc4\x98\xc4\x99\xc5\x81\xc5\x82\xc5\x83".
-                        "\xc5\x84\xc5\x9a\xc5\x9b\xc5\xbb\xc5\xbc\xc5\xb9\xc5\xba\xc3\xb3\xc3\x93";
+$wp_blip_plchars    =
+    "\xc4\x84\xc4\x85". ## Ąą
+    "\xc4\x86\xc4\x87". ## Ćć
+    "\xc4\x98\xc4\x99". ## Ęę
+    "\xc5\x81\xc5\x82". ## Łł
+    "\xc5\x83\xc5\x84". ## Ńń
+    "\xc3\x93\xc3\xb3". ## Óó
+    "\xc5\x9a\xc5\x9b". ## Śś
+    "\xc5\xbb\xc5\xbc". ## Żż
+    "\xc5\xb9\xc5\xba"; ## Źź
+
+$wp_blip_asciichars =   'AaCcEeLlNnOoSsZzZz';
 
 function wp_blip_debug () {
     $args = func_get_args ();
@@ -178,7 +190,7 @@ function wp_blip_filter_statuses_by_tags ($tags, $statuses) {
 
 function wp_blip_find_tags ($status) {
     $status = str_replace (array ('-', '_'), '', $status);
-    preg_match_all ("!#([a-zA-Z0-9$wp_blip_plchars]+)!", $status, $statuses);
+    preg_match_all ('!#([a-zA-Z0-9'.$GLOBALS['wp_blip_plchars'].']+)!', $status, $statuses);
     return $statuses[1];
 }
 
@@ -220,6 +232,14 @@ function wp_blip_get_options () {
     return $options;
 }
 
+function wp_blip_utf2ascii ($str) {
+    return str_replace (
+        str_split ($GLOBALS['wp_blip_plchars'], 2),
+        str_split ($GLOBALS['wp_blip_asciichars']),
+        $str
+    );
+}
+
 function wp_blip_linkify__callback ($match) {
     $opts = wp_blip_get_options ();
 
@@ -227,7 +247,7 @@ function wp_blip_linkify__callback ($match) {
         return '<a href="http://'. substr ($match[0], 1) .'.blip.pl/">'. $match[0] .'</a>';
     }
     else if ($match[0][0] == '#') {
-        return '<a href="http://blip.pl/tags/'. substr ($match[0], 1) .'">'. $match[0] .'</a>';
+        return '<a href="http://blip.pl/tags/'. wp_blip_utf2ascii (substr ($match[0], 1)) .'">'. $match[0] .'</a>';
     }
     else if (!isset ($match[1])) {
         return $match[0];
@@ -271,7 +291,7 @@ function wp_blip_linkify ($status, $opts = array ()) {
         return $status;
     }
 
-    $status = preg_replace_callback (
+    return preg_replace_callback (
         '!
         (?:
             (?:
@@ -284,13 +304,11 @@ function wp_blip_linkify ($status, $opts = array ()) {
                 )
             )
             |
-            (?:[#^][a-z0-9_'.$wp_blip_plchars.'-]+)
+            (?:[#^][-a-z0-9_'.$GLOBALS['wp_blip_plchars'].']+)
         )
         !xi',
         'wp_blip_linkify__callback',
         $status
     );
-
-    return $status;
 }
 
