@@ -11,7 +11,15 @@ require_once 'wp-blip-common.php';
 $wp_blip_options = wp_blip_get_options ();
 
 ?>
-<div class="wrap">
+<style type="text/css">
+div.wp_blip dt {
+    font-style: italic;
+}
+div.wp_blip dd {
+    padding-left: 1em;
+}
+</style>
+<div class="wrap wp_blip">
     <h2>WP-Blip!</h2>
 	<form method="post" action="options.php">
 		<?php wp_nonce_field('update-options') ?>
@@ -57,8 +65,39 @@ $wp_blip_options = wp_blip_get_options ();
 				</td>
 			</tr>
 			<tr valign="top">
+				<th scope="row">Sposób wyświetlania daty statusu:</th>
+                <td>
+                    <label for="wp_blip_datetype_relative"><input
+                        type="radio" name="wp_blip_datetype" value="relative" id="wp_blip_datetype_relative"
+                        <?php echo $wp_blip_options['datetype'] == 'relative' ? 'checked="checked"' : ''; ?>
+                        /> relatywny</label>
+                    <label for="wp_blip_datetype_relative_simple"><input
+                        type="radio" name="wp_blip_datetype" value="relative_simple" id="wp_blip_datetype_relative_simple"
+                        <?php echo $wp_blip_options['datetype'] == 'relative_simple' ? 'checked="checked"' : ''; ?>
+                        /> relatywny (uproszczony)</label>
+                    <label for="wp_blip_datetype_absolute"><input
+                        type="radio" name="wp_blip_datetype" value="absolute" id="wp_blip_datetype_absolute"
+                        <?php echo $wp_blip_options['datetype'] == 'absolute' ? 'checked="checked"' : ''; ?>
+                        /> absolutny</label><br />
+
+                    Przykłady:
+                    <dl>
+                        <dt>relatywny:</dt>
+                        <dd>2 minuty</dd>
+                        <dd>4 dni, 7 godzin, 4 minuty</dd>
+                        <dt>relatywny uproszczony:</dt>
+                        <dd>3 minuty</dd>
+                        <dd>3 dni</dd>
+                        <dt>absolutny:</dt>
+                        <dd>20.12.2009 20:01:37</dd>
+                    </dl>
+				</td>
+			</tr>
+			<tr valign="top">
 				<th scope="row"><label for="wp_blip_dateformat">Szablon daty:</label></th>
-				<td><input type="text" name="wp_blip_dateformat" id="wp_blip_dateformat" value="<?php echo htmlentities2 ($wp_blip_options['dateformat']) ?>" size="50"/><br />
+                <td><input type="text" name="wp_blip_dateformat" id="wp_blip_dateformat"
+                    value="<?php echo htmlentities2 ($wp_blip_options['dateformat']) ?>"
+                    size="50" <?php $wp_blip_options['datetype'] == 'relative' ? 'disabled="disabled"' : ''; ?> /><br />
 					Szczegóły: <a href="http://php.net/strftime">php.net/strftime</a>
 				</td>
 			</tr>
@@ -99,7 +138,7 @@ $wp_blip_options = wp_blip_get_options ();
 		<p class="submit">
             <input type="submit" class="button-primary" value="<?php _e('Save Changes') ?>" />
 		    <input type="hidden" name="action" value="update" />
-		    <input type="hidden" name="page_options" value="wp_blip_login,wp_blip_quant,wp_blip_time,wp_blip_tpl,wp_blip_dateformat,wp_blip_tags,wp_blip_tpl_container_pre,wp_blip_tpl_container_post,wp_blip_expand_rdir,wp_blip_expand_linked_statuses" />
+		    <input type="hidden" name="page_options" value="wp_blip_login,wp_blip_quant,wp_blip_time,wp_blip_tpl,wp_blip_dateformat,wp_blip_tags,wp_blip_tpl_container_pre,wp_blip_tpl_container_post,wp_blip_expand_rdir,wp_blip_expand_linked_statuses,wp_blip_datetype" />
         </p>
 	</form>
 </div>

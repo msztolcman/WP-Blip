@@ -39,6 +39,109 @@ function wp_blip_debug () {
     echo '</pre>';
 }
 
+function wp_blip_date_names ($ts, $unit) {
+    static $units = array (
+        's' => array ('sekundę',    'sekundy',  'sekund'),
+        'm' => array ('minutę',     'minuty',   'minut'),
+        'g' => array ('godzinę',    'godziny',  'godzin'),
+        'd' => array ('dzień',      'dni',      'dni'),
+        't' => array ('tydzień',    'tygodnie', 'tygodni'),
+        'M' => array ('miesiąc',    'miesiące', 'miesięcy'),
+        'r' => array ('rok',        'lata',     'lat')
+    );
+
+    if ($ts == 1) {
+        return $units[$unit][0];
+    }
+
+    $ts = $ts % 100;
+    if (
+        (
+            ($ts % 10) > 1 &&
+            ($ts % 10) < 5
+        )
+        &&
+        (
+            ($ts < 11) ||
+            ($ts > 15)
+        )
+    ) {
+        return $ts .' '. $units[$unit][1];
+    }
+    else {
+        return $ts .' '. $units[$unit][2];
+    }
+}
+
+function wp_blip_date_absolute ($ts, $options) {
+    return strftime ($options['dateformat'], $ts);
+}
+
+function wp_blip_date_relative ($ts, $options) {
+    $td = time () - $ts;
+
+    if ($td > (86400 * 365)) {
+        return wp_blip_date_absolute ($ts, $options);
+    }
+
+    $ret = array ();
+    if ($td > (86400 * 30)) { ## miesiące
+        $data = floor ($td / 86400 / 30);
+        $ret[] = wp_blip_date_names ($data, 'M');
+        $td -= $data * 86400 * 30;
+    }
+    if ($td > (86400 * 7)) { ## tygodnie
+        $data = floor ($td / 86400 / 7);
+        $ret[] = wp_blip_date_names ($data, 't');
+        $td -= $data * 86400 * 7;
+    }
+    if ($td > 86400) { ## dni
+        $data = floor ($td / 86400);
+        $ret[] = wp_blip_date_names ($data, 'd');
+        $td -= $data * 86400;
+    }
+    if ($td > (3600)) { ## godziny
+        $data = floor ($td / 3600);
+        $ret[] = wp_blip_date_names ($data, 'g');
+        $td -= $data * 3600;
+    }
+    if ($td > 60) { ## minuty
+        $data = floor ($td / 60);
+        $ret[] = wp_blip_date_names ($data, 'm');
+        $td -= $data * 60;
+    }
+    if ($td > 0) { ## sekundy
+        $ret[] = wp_blip_date_names ($td, 's');
+    }
+
+    return join (', ', $ret);
+}
+
+function wp_blip_date_relative_simple ($ts, $options) {
+    $diff = time () - $ts;
+    if ($diff/31536000 >= 1) {
+        return wp_blip_date_names (floor ($diff/31536000), 'r');
+    }
+    elseif ($diff/2592000 >= 1) {
+        return wp_blip_date_names (floor ($diff/2592000), 'M');
+    }
+    elseif ($diff/604800 >= 1) {
+        return wp_blip_date_names (floor ($diff/604800), 't');
+    }
+    elseif ($diff/86400 >= 1) {
+        return wp_blip_date_names (floor ($diff/86400), 'd');
+    }
+    elseif ($diff/3600 >= 1) {
+        return wp_blip_date_names (floor ($diff/3600), 'g');
+    }
+    elseif ($diff/60 >= 1) {
+        return wp_blip_date_names (floor ($diff/60), 'm');
+    }
+    else {
+        return wp_blip_date_names ($diff, 's');
+    }
+}
+
 function wp_blip ($join="\n", $echo=0) {
     $options = wp_blip_get_options ();
 	if (!$options['login']) {
@@ -47,11 +150,12 @@ function wp_blip ($join="\n", $echo=0) {
 
 	$updates = wp_blip_cache ();
 
-	$pat = array ('%date', '%body', '%url');
-	$ret = array ();
+	$pat        = array ('%date', '%body', '%url');
+    $ret        = array ();
+    $date_fun   = 'wp_blip_date_' . $options['datetype'];
 	foreach ($updates as $update) {
-		$rep = array (
-			strftime ($options['dateformat'], $update['created_at']),
+        $rep = array (
+            $date_fun ($update['created_at'], $options),
 			$update['body'],
 			'http://blip.pl/s/'. $update['id'],
 		);
@@ -82,8 +186,7 @@ function wp_blip_connect () {
 		require_once 'blipapi.php';
 		$bapi = new BlipApi ();
 		$bapi->connect ();
-		$bapi->uagent = 'WP Blip!/0.4.8 (http://wp-blip.googlecode.com)';
-
+		$bapi->uagent = 'WP Blip!/0.5.0 (http://wp-blip.googlecode.com)';
     }
 
     return $bapi;
@@ -211,6 +314,7 @@ function wp_blip_get_options () {
             'time'                      => 300,
             'tags'                      => '',
             'dateformat'                => '%Y-%m-%d %H:%M:%S',
+            'datetype'                  => 'absolute',
             'tpl_container_pre'         => '<ul>',
             'tpl_container_post'        => '</ul>',
             'expand_rdir'               => false,
