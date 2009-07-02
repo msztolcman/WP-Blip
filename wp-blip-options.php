@@ -84,10 +84,12 @@ div.wp_blip dd {
                     <dl>
                         <dt>relatywny:</dt>
                         <dd>2 minuty</dd>
+                        <dd>3 godziny, 2 minuty</dd>
                         <dd>4 dni, 7 godzin, 4 minuty</dd>
                         <dt>relatywny uproszczony:</dt>
-                        <dd>3 minuty</dd>
-                        <dd>3 dni</dd>
+                        <dd>2 minuty</dd>
+                        <dd>3 godziny</dd>
+                        <dd>4 dni</dd>
                         <dt>absolutny:</dt>
                         <dd>20.12.2009 20:01:37</dd>
                     </dl>
