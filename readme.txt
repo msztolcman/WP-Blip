@@ -24,9 +24,9 @@ Teraz masz dwie opcje do wyboru. Jeśli używasz skórki obsługującej widgety:
 
 W przeciwnym wypadku musisz ręcznie dodać odpowiedni wpis do skórki:
 3b. W szablonie, w miejscu w którym ma się wyświetlić lista wpisów, dodaj kod:
-`&lt;?php
-if (function_exists ('wp_blip')) { wp_blip("\n", 1); }
-?&gt;`
+    <?php
+    if (function_exists ('wp_blip')) { wp_blip("\n", 1); }
+    ?>`
 
 4. W Ustawienia -> WP-Blip! możesz skonfigurować sposób działania wtyczki.
 
@@ -48,8 +48,9 @@ Ponieważ dla każdego linku z osobna trzeba pobrać dodatkowe dane z serwisu Bl
 = 0.5.0 =
 * możliwość użycia WP-Blip! jako widgetu (ciągle można używać w wersji bez-widgetowej!) (issue #1)
 * możliwość zmiany sposobu wyświetlania daty. Teraz data może być absolutna, relatywna i relatywna uproszczona (issue #2)
-* fix: pl-znaczki nie były uwzględniane w nazwach tagów
-* fix: WP-Blip! gryzł się nieco z WP-BlipBot-em (i/lub innymi wtyczkami korzystającymi z modularnego BlipApi.php) - nie umiały nawzajem korzystać z pluginów blipapi które nie są w katalogu pierwszej wczytanek wersji BlipApi.php
+* poprawki błędów:
+ - pl-znaczki nie były uwzględniane w nazwach tagów
+ - WP-Blip! gryzł się nieco z WP-BlipBot-em (i/lub innymi wtyczkami korzystającymi z modularnego BlipApi.php) - nie umiały nawzajem korzystać z pluginów blipapi które nie są w katalogu pierwszej wczytanej wersji BlipApi.php
 
 = 0.4.8 =
 * w niektórych sytuacjach sypało się rozwijanie linków i nazw userów
@@ -57,9 +58,9 @@ Ponieważ dla każdego linku z osobna trzeba pobrać dodatkowe dane z serwisu Bl
 * możliwość włączenia rozwijania linków z rdir.pl
 * możliwość włączenia pobierania podlinkowanych statusów i wyświetlanie ich w title linku (po przytrzymaniu kursora nad odnośnikiem)
 * poprawki błędów:
-** błędy przy pobieraniu statusów przy ograniczeniu dla konkretnych tagów
-** błędnie linkował adresy inne niż blip.pl - zła kolejność podmieniania adresów
-** w treści wpisów nie były enkodowane znaki wrażliwe dla HTML
+ - błędy przy pobieraniu statusów przy ograniczeniu dla konkretnych tagów
+ - błędnie linkował adresy inne niż blip.pl - zła kolejność podmieniania adresów
+ - w treści wpisów nie były enkodowane znaki wrażliwe dla HTML
 = 0.4.6 =
 * nie jest już potrzebne podawanie hasła do Blip!a
 * można wyświetlać wpisy dowolnego usera
@@ -71,4 +72,7 @@ Ponieważ dla każdego linku z osobna trzeba pobrać dodatkowe dane z serwisu Bl
 * możliwość zdefiniowania treści przed i za listą statusów
 * porządki w kodzie i w układzie plików
 
-== Wym
+== Wymagania ==
+* PHP w wersji 5.2 lub wyżej
+* działające rozszerzenie PHP curl
+
