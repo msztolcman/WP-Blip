@@ -39,109 +39,7 @@ function wp_blip_debug () {
     echo '</pre>';
 }
 
-function wp_blip_date_names ($ts, $unit) {
-    static $units = array (
-        's' => array ('sekundę',    'sekundy',  'sekund'),
-        'm' => array ('minutę',     'minuty',   'minut'),
-        'g' => array ('godzinę',    'godziny',  'godzin'),
-        'd' => array ('dzień',      'dni',      'dni'),
-        't' => array ('tydzień',    'tygodnie', 'tygodni'),
-        'M' => array ('miesiąc',    'miesiące', 'miesięcy'),
-        'r' => array ('rok',        'lata',     'lat')
-    );
-
-    if ($ts == 1) {
-        return $units[$unit][0];
-    }
-
-    $ts = $ts % 100;
-    if (
-        (
-            ($ts % 10) > 1 &&
-            ($ts % 10) < 5
-        )
-        &&
-        (
-            ($ts < 11) ||
-            ($ts > 15)
-        )
-    ) {
-        return $ts .' '. $units[$unit][1];
-    }
-    else {
-        return $ts .' '. $units[$unit][2];
-    }
-}
-
-function wp_blip_date_absolute ($ts, $options) {
-    return strftime ($options['dateformat'], $ts);
-}
-
-function wp_blip_date_relative ($ts, $options) {
-    $td = time () - $ts;
-
-    if ($td > (86400 * 365)) {
-        return wp_blip_date_absolute ($ts, $options);
-    }
-
-    $ret = array ();
-    if ($td > (86400 * 30)) { ## miesiące
-        $data = floor ($td / 86400 / 30);
-        $ret[] = wp_blip_date_names ($data, 'M');
-        $td -= $data * 86400 * 30;
-    }
-    if ($td > (86400 * 7)) { ## tygodnie
-        $data = floor ($td / 86400 / 7);
-        $ret[] = wp_blip_date_names ($data, 't');
-        $td -= $data * 86400 * 7;
-    }
-    if ($td > 86400) { ## dni
-        $data = floor ($td / 86400);
-        $ret[] = wp_blip_date_names ($data, 'd');
-        $td -= $data * 86400;
-    }
-    if ($td > (3600)) { ## godziny
-        $data = floor ($td / 3600);
-        $ret[] = wp_blip_date_names ($data, 'g');
-        $td -= $data * 3600;
-    }
-    if ($td > 60) { ## minuty
-        $data = floor ($td / 60);
-        $ret[] = wp_blip_date_names ($data, 'm');
-        $td -= $data * 60;
-    }
-    if ($td > 0) { ## sekundy
-        $ret[] = wp_blip_date_names ($td, 's');
-    }
-
-    return join (', ', $ret);
-}
-
-function wp_blip_date_relative_simple ($ts, $options) {
-    $diff = time () - $ts;
-    if ($diff/31536000 >= 1) {
-        return wp_blip_date_names (floor ($diff/31536000), 'r');
-    }
-    elseif ($diff/2592000 >= 1) {
-        return wp_blip_date_names (floor ($diff/2592000), 'M');
-    }
-    elseif ($diff/604800 >= 1) {
-        return wp_blip_date_names (floor ($diff/604800), 't');
-    }
-    elseif ($diff/86400 >= 1) {
-        return wp_blip_date_names (floor ($diff/86400), 'd');
-    }
-    elseif ($diff/3600 >= 1) {
-        return wp_blip_date_names (floor ($diff/3600), 'g');
-    }
-    elseif ($diff/60 >= 1) {
-        return wp_blip_date_names (floor ($diff/60), 'm');
-    }
-    else {
-        return wp_blip_date_names ($diff, 's');
-    }
-}
-
+## funkcje główne
 function wp_blip ($join="\n", $echo=0) {
     $options = wp_blip_get_options ();
 	if (!$options['login']) {
@@ -179,19 +77,6 @@ function wp_blip ($join="\n", $echo=0) {
 	return $ret;
 }
 
-function wp_blip_connect () {
-    static $bapi;
-
-    if (is_null ($bapi)) {
-		require_once 'blipapi.php';
-		$bapi = new BlipApi ();
-		$bapi->connect ();
-		$bapi->uagent = 'WP Blip!/0.5.0 (http://wp-blip.googlecode.com)';
-    }
-
-    return $bapi;
-}
-
 function wp_blip_cache () {
     $options = wp_blip_get_options ();
 	if (!$options['login']) {
@@ -202,7 +87,7 @@ function wp_blip_cache () {
         trigger_error ('WP-Blip! cannot write cache file in '. $GLOBALS['wp_blip_cacheroot'] .' directory.', E_USER_NOTICE);
     }
 
-	$cachefile = wp_blip_get_cache_filename ();
+	$cachefile = _wp_blip_get_cache_filename ();
 
 	$ret = array ();
 	if ((!defined ('WP_BLIP_DEBUG') || !WP_BLIP_DEBUG) && $options['time'] && file_exists ($cachefile) && (filemtime ($cachefile) + $options['time']) > time ()) {
@@ -225,13 +110,13 @@ function wp_blip_cache () {
             $options['tags'] = preg_split ('!\s!', $options['tags']);
 
             ## odfiltrowujemy niechciane statusy
-            $statuses = wp_blip_filter_statuses_by_tags ($options['tags'], $statuses['body']);
+            $statuses = _wp_blip_filter_statuses_by_tags ($options['tags'], $statuses['body']);
 
             ## szukamy pozostałych statusów jeśli trzeba
             $offset = $options['quant'];
             while (count ($statuses) < $options['quant']) {
 		        $filtered = $bapi->status_read (null, $options['login'], array (), false, 20, $offset);
-                $filtered = wp_blip_filter_statuses_by_tags ($options['tags'], $filtered['body']);
+                $filtered = _wp_blip_filter_statuses_by_tags ($options['tags'], $filtered['body']);
                 if (count ($filtered)) {
                     $statuses = array_merge ($statuses, $filtered);
                 }
@@ -268,8 +153,23 @@ function wp_blip_cache () {
 	}
 }
 
+
+## funkcje narzędziowe
+function wp_blip_connect () {
+    static $bapi;
+
+    if (is_null ($bapi)) {
+		require_once 'blipapi.php';
+		$bapi = new BlipApi ();
+		$bapi->connect ();
+		$bapi->uagent = 'WP Blip!/0.5.0 (http://wp-blip.googlecode.com)';
+    }
+
+    return $bapi;
+}
+
 function wp_blip_cache_invalidate () {
-    $cachefile = wp_blip_get_cache_filename ();
+    $cachefile = _wp_blip_get_cache_filename ();
 
     if (is_file ($cachefile)) {
         @unlink ($cachefile);
@@ -277,30 +177,73 @@ function wp_blip_cache_invalidate () {
     return !is_file ($cachefile);
 }
 
-function wp_blip_filter_statuses_by_tags ($tags, $statuses) {
-    $filtered = array ();
-    foreach ($statuses as $status) {
-        foreach (wp_blip_find_tags ($status->body) as $tag) {
-            if (in_array ($tag, $tags)) {
-                $filtered[] = $status;
-                continue 2;
-            }
-        }
+function wp_blip_date_absolute ($ts, $options) {
+    return strftime ($options['dateformat'], $ts);
+}
+
+function wp_blip_date_relative ($ts, $options) {
+    $time_diff = time () - $ts;
+
+    if ($time_diff > (86400 * 365)) {
+        return wp_blip_date_absolute ($ts, $options);
     }
 
-    return $filtered;
+    $ret = array ();
+    if ($time_diff > (86400 * 30)) { ## miesiące
+        $data = floor ($time_diff / 86400 / 30);
+        $ret[] = _wp_blip_date_names ($data, 'm');
+        $time_diff -= $data * 86400 * 30;
+    }
+    if ($time_diff > (86400 * 7)) { ## tygodnie
+        $data = floor ($time_diff / 86400 / 7);
+        $ret[] = _wp_blip_date_names ($data, 'w');
+        $time_diff -= $data * 86400 * 7;
+    }
+    if ($time_diff > 86400) { ## dni
+        $data = floor ($time_diff / 86400);
+        $ret[] = _wp_blip_date_names ($data, 'd');
+        $time_diff -= $data * 86400;
+    }
+    if ($time_diff > (3600)) { ## godziny
+        $data = floor ($time_diff / 3600);
+        $ret[] = _wp_blip_date_names ($data, 'H');
+        $time_diff -= $data * 3600;
+    }
+    if ($time_diff > 60) { ## minuty
+        $data = floor ($time_diff / 60);
+        $ret[] = _wp_blip_date_names ($data, 'M');
+        $time_diff -= $data * 60;
+    }
+    if ($time_diff > 0) { ## sekundy
+        $ret[] = _wp_blip_date_names ($time_diff, 'S');
+    }
+
+    return join (', ', $ret);
 }
 
-function wp_blip_find_tags ($status) {
-    $status = str_replace (array ('-', '_'), '', $status);
-    preg_match_all ('!#([a-zA-Z0-9'.$GLOBALS['wp_blip_plchars'].']+)!', $status, $statuses);
-    return $statuses[1];
-}
-
-function wp_blip_get_cache_filename () {
-    $options = wp_blip_get_options ();
-
-	return $GLOBALS['wp_blip_cacheroot'] . '/' . $options['login'] . '_' . $options['quant'] . '.cache.txt';
+function wp_blip_date_relative_simple ($ts, $options) {
+    $time_diff = time () - $ts;
+    if ($time_diff/31536000 >= 1) {
+        return _wp_blip_date_names (floor ($time_diff/31536000), 'y');
+    }
+    elseif ($time_diff/2592000 >= 1) {
+        return _wp_blip_date_names (floor ($time_diff/2592000), 'm');
+    }
+    elseif ($time_diff/604800 >= 1) {
+        return _wp_blip_date_names (floor ($time_diff/604800), 'w');
+    }
+    elseif ($time_diff/86400 >= 1) {
+        return _wp_blip_date_names (floor ($time_diff/86400), 'd');
+    }
+    elseif ($time_diff/3600 >= 1) {
+        return _wp_blip_date_names (floor ($time_diff/3600), 'H');
+    }
+    elseif ($time_diff/60 >= 1) {
+        return _wp_blip_date_names (floor ($time_diff/60), 'M');
+    }
+    else {
+        return _wp_blip_date_names ($time_diff, 'S');
+    }
 }
 
 function wp_blip_get_options () {
@@ -336,6 +279,32 @@ function wp_blip_get_options () {
     return $options;
 }
 
+function wp_blip_linkify ($status, $opts = array ()) {
+    if (!$status || gettype ($status) != 'string') {
+        return $status;
+    }
+
+    return preg_replace_callback (
+        '!
+        (?:
+            (?:
+                https?://
+                (?:www.)?
+                (
+                    blip\.pl/[a-z0-9_-]+/[a-z0-9_-]+
+                    |
+                    rdir\.pl/[a-z0-9_-]+
+                )
+            )
+            |
+            (?:[#^][-a-z0-9_'.$GLOBALS['wp_blip_plchars'].']+)
+        )
+        !xi',
+        '_wp_blip_linkify__callback',
+        $status
+    );
+}
+
 function wp_blip_utf2ascii ($str) {
     return str_replace (
         str_split ($GLOBALS['wp_blip_plchars'], 2),
@@ -344,7 +313,69 @@ function wp_blip_utf2ascii ($str) {
     );
 }
 
-function wp_blip_linkify__callback ($match) {
+
+## funkcje pomocnicze (callbacki)
+function _wp_blip_date_names ($ts, $unit) {
+    static $units = array (
+        'S' => array ('sekundę',    'sekundy',  'sekund'),
+        'M' => array ('minutę',     'minuty',   'minut'),
+        'H' => array ('godzinę',    'godziny',  'godzin'),
+        'd' => array ('dzień',      'dni',      'dni'),
+        'w' => array ('tydzień',    'tygodnie', 'tygodni'),
+        'm' => array ('miesiąc',    'miesiące', 'miesięcy'),
+        'y' => array ('rok',        'lata',     'lat')
+    );
+
+    if ($ts == 1) {
+        return $units[$unit][0];
+    }
+
+    $ts = $ts % 100;
+    if (
+        (
+            ($ts % 10) > 1 &&
+            ($ts % 10) < 5
+        )
+        &&
+        (
+            ($ts < 11) ||
+            ($ts > 15)
+        )
+    ) {
+        return $ts .' '. $units[$unit][1];
+    }
+    else {
+        return $ts .' '. $units[$unit][2];
+    }
+}
+
+function _wp_blip_filter_statuses_by_tags ($tags, $statuses) {
+    $filtered = array ();
+    foreach ($statuses as $status) {
+        foreach (_wp_blip_find_tags ($status->body) as $tag) {
+            if (in_array ($tag, $tags)) {
+                $filtered[] = $status;
+                continue 2;
+            }
+        }
+    }
+
+    return $filtered;
+}
+
+function _wp_blip_find_tags ($status) {
+    $status = str_replace (array ('-', '_'), '', $status);
+    preg_match_all ('!#([a-zA-Z0-9'.$GLOBALS['wp_blip_plchars'].']+)!', $status, $statuses);
+    return $statuses[1];
+}
+
+function _wp_blip_get_cache_filename () {
+    $options = wp_blip_get_options ();
+
+	return $GLOBALS['wp_blip_cacheroot'] . '/' . $options['login'] . '_' . $options['quant'] . '.cache.txt';
+}
+
+function _wp_blip_linkify__callback ($match) {
     $opts = wp_blip_get_options ();
 
     if ($match[0][0] == '^') {
@@ -388,31 +419,5 @@ function wp_blip_linkify__callback ($match) {
     }
 
     return $match[0];
-}
-
-function wp_blip_linkify ($status, $opts = array ()) {
-    if (!$status || gettype ($status) != 'string') {
-        return $status;
-    }
-
-    return preg_replace_callback (
-        '!
-        (?:
-            (?:
-                https?://
-                (?:www.)?
-                (
-                    blip\.pl/[a-z0-9_-]+/[a-z0-9_-]+
-                    |
-                    rdir\.pl/[a-z0-9_-]+
-                )
-            )
-            |
-            (?:[#^][-a-z0-9_'.$GLOBALS['wp_blip_plchars'].']+)
-        )
-        !xi',
-        'wp_blip_linkify__callback',
-        $status
-    );
 }
 

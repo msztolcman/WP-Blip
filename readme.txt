@@ -41,7 +41,7 @@ Proszę o zgłaszanie wszelkich uwag i problemów na tagu [#wpblip](http://blip.
 Ponieważ dla każdego linku z osobna trzeba pobrać dodatkowe dane z serwisu Blip!
 
 == Screenshots ==
-1. Dodany widget
+1. Rozwinięty widget WP-Blip!
 2. Panel administracyjny
 
 == Changelog ==
@@ -51,6 +51,7 @@ Ponieważ dla każdego linku z osobna trzeba pobrać dodatkowe dane z serwisu Bl
 * poprawki błędów:
  - pl-znaczki nie były uwzględniane w nazwach tagów
  - WP-Blip! gryzł się nieco z WP-BlipBot-em (i/lub innymi wtyczkami korzystającymi z modularnego BlipApi.php) - nie umiały nawzajem korzystać z pluginów blipapi które nie są w katalogu pierwszej wczytanej wersji BlipApi.php
+* porządki w kodzie
 
 = 0.4.8 =
 * w niektórych sytuacjach sypało się rozwijanie linków i nazw userów
