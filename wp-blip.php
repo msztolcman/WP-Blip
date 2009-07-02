@@ -27,7 +27,7 @@
 */
 
 
-define ('WP_BLIP_DEBUG', true);
+define ('WP_BLIP_DEBUG', false);
 
 require_once 'wp-blip-common.php';
 
