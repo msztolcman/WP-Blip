@@ -1,9 +1,9 @@
 === Plugin Name ===
 Contributors: mysz
-Tags: blip, microblogging
+Tags: blip, microblogging, widget
 Requires at least: 2.7
 Tested up to: 2.8
-Stable tag: 0.5.0
+Stable tag: 0.5.1
 
 WP-Blip! służy do wyświetlania ostatnich wpisów z Blip!a w Wordpressie.
 
@@ -45,6 +45,9 @@ Ponieważ dla każdego linku z osobna trzeba pobrać dodatkowe dane z serwisu Bl
 2. Panel administracyjny
 
 == Changelog ==
+= 0.5.1 =
+* wysłany nagłówek Cache-Control z wartością no-cache powoduje ponowne wczytanie statusów
+
 = 0.5.0 =
 * możliwość użycia WP-Blip! jako widgetu (ciągle można używać w wersji bez-widgetowej!) (issue #1)
 * możliwość zmiany sposobu wyświetlania daty. Teraz data może być absolutna, relatywna i relatywna uproszczona (issue #2)
