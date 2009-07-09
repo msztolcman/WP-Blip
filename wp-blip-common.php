@@ -168,7 +168,7 @@ function wp_blip_connect () {
 		require_once 'blipapi.php';
 		$bapi = new BlipApi ();
 		$bapi->connect ();
-		$bapi->uagent = 'WP Blip!/0.5.0 (http://wp-blip.googlecode.com)';
+		$bapi->uagent = 'WP Blip!/0.5.1 (http://wp-blip.googlecode.com)';
     }
 
     return $bapi;
