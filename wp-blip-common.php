@@ -90,7 +90,13 @@ function wp_blip_cache () {
 	$cachefile = _wp_blip_get_cache_filename ();
 
 	$ret = array ();
-	if ((!defined ('WP_BLIP_DEBUG') || !WP_BLIP_DEBUG) && $options['time'] && file_exists ($cachefile) && (filemtime ($cachefile) + $options['time']) > time ()) {
+    if (
+        (!defined ('WP_BLIP_DEBUG') || !WP_BLIP_DEBUG) &&
+        $options['time'] &&
+        file_exists ($cachefile) &&
+        (filemtime ($cachefile) + $options['time']) > time () &&
+        (!isset ($_ENV['HTTP_CACHE_CONTROL']) || strtolower ($_ENV['HTTP_CACHE_CONTROL']) != 'no-cache')
+    ) {
 		return unserialize (stripslashes (file_get_contents ($cachefile)));
 	}
 	else {
