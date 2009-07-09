@@ -6,6 +6,8 @@
  * $Id$
  */
 
+define ('WP_BLIP', true);
+
 set_include_path (get_include_path() . PATH_SEPARATOR . dirname (__FILE__));
 
 $wp_blip_cacheroot  = dirname (__FILE__);

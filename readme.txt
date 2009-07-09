@@ -16,19 +16,21 @@ Proszę o zgłaszanie wszelkich uwag i problemów na tagu [#wpblip](http://blip.
 
 == Installation ==
 
-1. Rozpakuj wp-blip.X.X.X.zip do dowolnego folderu w WORDPRESS_ROOT/wp-content/plugins (zostanie utworzony katalog wp-blip).
-2. Przejdź do panelu administracyjnego, i aktywuj wtyczkę.
+1. Wejdź do panelu administracyjnego, przejdź do **Wtyczki** -> **Dodaj nową**.
+2. W okno wyszukiwarki wpisz **WP-Blip!** i wciśnij *Enter*.
+3. Na liście wtyczek znajdź pozycję **WP-Blip!** i znajdź po prawej stronie link **Zainstaluj**. Kliknij go.
+4. Otworzy się okienko z opisem wtyczki - kliknij znajdujący się po prawej stronie przycisk **Zainstaluj**.
+5. W tej chwili wtyczka jest już zainstalowana - na dole znajdziesz link **Włącz wtyczkę**. Kliknij na nim.
+6. Voila! Wtyczka jest zainstalowana :)
 
-Teraz masz dwie opcje do wyboru. Jeśli używasz skórki obsługującej widgety:
-3a. Przejdź do Wygląd -> Widgety, przeciągnij WP-Blip! do miejsca w którym chcesz wyświetlać statusy, uzupełnij tytuł, i zapisz zmiany.
-
-W przeciwnym wypadku musisz ręcznie dodać odpowiedni wpis do skórki:
-3b. W szablonie, w miejscu w którym ma się wyświetlić lista wpisów, dodaj kod:
-    <?php
+7. Teraz masz dwie opcje do wyboru:
+ 1. Jeśli używasz skórki obsługującej widgety: Przejdź do **Wygląd** -> **Widgety**, przeciągnij **WP-Blip!** do miejsca w którym chcesz wyświetlać statusy, uzupełnij tytuł, i zapisz zmiany.
+ 2. W przeciwnym wypadku musisz ręcznie dodać odpowiedni wpis do skórki: W szablonie, w miejscu w którym ma się wyświetlić lista wpisów, dodaj kod:
+    &lt;?php
     if (function_exists ('wp_blip')) { wp_blip("\n", 1); }
-    ?>`
+    ?&gt;
 
-4. W Ustawienia -> WP-Blip! możesz skonfigurować sposób działania wtyczki.
+8. W **Ustawienia** -> **WP-Blip!** możesz skonfigurować sposób działania wtyczki.
 
 == Frequently Asked Questions ==
 
@@ -47,6 +49,7 @@ Ponieważ dla każdego linku z osobna trzeba pobrać dodatkowe dane z serwisu Bl
 == Changelog ==
 = 0.5.1 =
 * wysłany nagłówek Cache-Control z wartością no-cache powoduje ponowne wczytanie statusów
+* zabezpieczenie przed parsowaniem pliku z opcjami poprzez bezpośrednie odwołanie do wp-blip-options.php
 
 = 0.5.0 =
 * możliwość użycia WP-Blip! jako widgetu (ciągle można używać w wersji bez-widgetowej!) (issue #1)

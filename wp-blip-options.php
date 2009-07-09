@@ -6,6 +6,8 @@
  * $Id$
  */
 
+if (!defined ('WP_BLIP')) exit;
+
 require_once 'wp-blip-common.php';
 
 $wp_blip_options = wp_blip_get_options ();
