@@ -41,46 +41,43 @@ function wp_blip_option_page () {
 
 add_action('admin_menu', 'wp_blip_admin_actions');
 
-class WPBlip_Widget extends WP_Widget {
-	function WPBlip_Widget() {
-        $widget_opts    = array('classname' => 'wp_blip_widget', 'description' => 'Wyświetl statusy z Blip!a' );
-        parent::WP_Widget (false, $name = 'WP-Blip!', $widget_opts);
-	}
+if (class_exists ('WP_Widget')) {
+    class WPBlip_Widget extends WP_Widget {
+        function WPBlip_Widget() {
+            $widget_opts    = array('classname' => 'wp_blip_widget', 'description' => 'Wyświetl statusy z Blip!a' );
+            parent::WP_Widget (false, $name = 'WP-Blip!', $widget_opts);
+        }
 
-	function widget($args, $instance) {
-        echo $args['before_widget'];
-        echo $args['before_title'].
-            $instance['title'].
-            $args['after_title'];
+        function widget($args, $instance) {
+            echo $args['before_widget'];
+            echo $args['before_title'].
+                $instance['title'].
+                $args['after_title'];
 
-        wp_blip ("\n", true);
+            wp_blip ("\n", true);
 
-        echo $args['after_widget'];
-	}
+            echo $args['after_widget'];
+        }
 
-	function update ($new_instance, $old_instance) {
-        return $new_instance;
-	}
+        function update ($new_instance, $old_instance) {
+            return $new_instance;
+        }
 
-	function form ($instance) {
-        $title = esc_attr ($instance['title']);
+        function form ($instance) {
+            $title = esc_attr ($instance['title']);
 
-        printf ('<p><label for="%s">%s<input class="widefat" id="%s" name="%s" type="text" value="%s" /></label></p>',
-            $this->get_field_id ('title'),
-            _e ('Title:'),
-            $this->get_field_id ('title'),
-            $this->get_field_name ('title'),
-            $title
-        );
+            printf ('<p><label for="%s">%s<input class="widefat" id="%s" name="%s" type="text" value="%s" /></label></p>',
+                $this->get_field_id ('title'),
+                _e ('Title:'),
+                $this->get_field_id ('title'),
+                $this->get_field_name ('title'),
+                $title
+            );
 
-        printf ('<p><a href="%s/wp-admin/options-general.php?page=WP-Blip">Więcej ustawień</a></p>',
-            get_bloginfo ('wpurl')
-        );
-	}
-}
+            printf ('<p><a href="%s/wp-admin/options-general.php?page=WP-Blip">Więcej ustawień</a></p>',
+                get_bloginfo ('wpurl')
+            );
+        }
+    }
 
-function wp_blip_register_widget () {
-    register_widget ('WPBlip_Widget');
-}
-add_action('widgets_init', 'wp_blip_register_widget');
-
+  

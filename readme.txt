@@ -24,7 +24,7 @@ Proszę o zgłaszanie wszelkich uwag i problemów na tagu [#wpblip](http://blip.
 6. Voila! Wtyczka jest zainstalowana :)
 
 7. Teraz masz dwie opcje do wyboru:
- 1. Jeśli używasz skórki obsługującej widgety: Przejdź do **Wygląd** -> **Widgety**, przeciągnij **WP-Blip!** do miejsca w którym chcesz wyświetlać statusy, uzupełnij tytuł, i zapisz zmiany.
+ 1. Jeśli używasz skórki obsługującej widgety i WordPress w wersji przynajmniej 2.8: Przejdź do **Wygląd** -> **Widgety**, przeciągnij **WP-Blip!** do miejsca w którym chcesz wyświetlać statusy, uzupełnij tytuł, i zapisz zmiany.
  2. W przeciwnym wypadku musisz ręcznie dodać odpowiedni wpis do skórki: W szablonie, w miejscu w którym ma się wyświetlić lista wpisów, dodaj kod:
     &lt;?php
     if (function_exists ('wp_blip')) { wp_blip("\n", 1); }
@@ -50,6 +50,7 @@ Ponieważ dla każdego linku z osobna trzeba pobrać dodatkowe dane z serwisu Bl
 = 0.5.1 =
 * wysłany nagłówek Cache-Control z wartością no-cache powoduje ponowne wczytanie statusów
 * zabezpieczenie przed parsowaniem pliku z opcjami poprzez bezpośrednie odwołanie do wp-blip-options.php
+* zabezpieczenie przed wyrzucaniem błędu o nieistniejącej klasie WP_Widget w WP starszym niż 2.8 - WP-Blip! jako widget działa tylko w wersji WordPressa 2.8 i wyżej
 
 = 0.5.0 =
 * możliwość użycia WP-Blip! jako widgetu (ciągle można używać w wersji bez-widgetowej!) (issue #1)
