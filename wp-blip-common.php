@@ -170,7 +170,7 @@ function wp_blip_connect () {
     if (is_null ($bapi)) {
 		require_once 'blipapi.php';
 
-        if (!function_exists ('json_decode') || 1) {
+        if (!function_exists ('json_decode')) {
             require_once 'JSON.class.php';
             ## brzydki hack - dotychczas w blipapi.php nie dalo sie latwo zmienic funkcji parsujacej json
             ## w nowej wersji bedzie to poprawione, i ten hack nie bedzie potrzebny
