@@ -99,6 +99,7 @@ function wp_blip_cache () {
         (filemtime ($cachefile) + $options['time']) > time () &&
         (!isset ($_ENV['HTTP_CACHE_CONTROL']) || strtolower ($_ENV['HTTP_CACHE_CONTROL']) != 'no-cache')
     ) {
+
 		return unserialize (stripslashes (file_get_contents ($cachefile)));
 	}
 	else {
@@ -168,7 +169,25 @@ function wp_blip_connect () {
 
     if (is_null ($bapi)) {
 		require_once 'blipapi.php';
-		$bapi = new BlipApi ();
+
+        if (!function_exists ('json_decode') || 1) {
+            require_once 'JSON.class.php';
+            ## brzydki hack - dotychczas w blipapi.php nie dalo sie latwo zmienic funkcji parsujacej json
+            ## w nowej wersji bedzie to poprawione, i ten hack nie bedzie potrzebny
+            class WPBlipAPI extends BlipApi {
+                public function __construct ($login=null, $passwd=null, $dont_connect=false) {
+                    $json = new Services_JSON ();
+                    $this->_parsers['application/json'] = array ($json, 'decode');
+
+                    return parent::__construct ($login, $passwd, $dont_connect);
+                }
+            }
+            $bapi = new WPBlipAPI ();
+        }
+        else {
+            $bapi = new BlipApi ();
+        }
+
 		$bapi->connect ();
 		$bapi->uagent = 'WP Blip!/0.5.1 (http://wp-blip.googlecode.com)';
     }
@@ -254,7 +273,7 @@ function wp_blip_date_relative_simple ($ts, $options) {
     }
 }
 
-function wp_blip_get_options () {
+function wp_blip_get_options ($keys = null) {
     static $options = null;
 
     if (is_null ($options)) {
@@ -282,6 +301,20 @@ function wp_blip_get_options () {
         if (get_option ('wp_blip_password') !== false) {
             delete_option ('wp_blip_password');
         }
+    }
+
+    if (is_string ($keys)) {
+        return $options[$keys];
+    }
+    else if (is_array ($keys)) {
+        $ret = array ();
+        foreach ($keys as $key) {
+            if (!isset ($options[$key])) {
+                continue;
+            }
+            $ret[$key] = $options[$key];
+        }
+        return $ret;
     }
 
     return $options;
