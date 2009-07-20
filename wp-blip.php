@@ -80,4 +80,9 @@ if (class_exists ('WP_Widget')) {
         }
     }
 
-  
+    function wp_blip_register_widget () {
+        register_widget ('WPBlip_Widget');
+    }
+    add_action('widgets_init', 'wp_blip_register_widget');
+}
+
