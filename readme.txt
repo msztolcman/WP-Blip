@@ -51,6 +51,7 @@ Ponieważ dla każdego linku z osobna trzeba pobrać dodatkowe dane z serwisu Bl
 * wysłany nagłówek Cache-Control z wartością no-cache powoduje ponowne wczytanie statusów
 * zabezpieczenie przed parsowaniem pliku z opcjami poprzez bezpośrednie odwołanie do wp-blip-options.php
 * zabezpieczenie przed wyrzucaniem błędu o nieistniejącej klasie WP_Widget w WP starszym niż 2.8 - WP-Blip! jako widget działa tylko w wersji WordPressa 2.8 i wyżej
+* jeśli nie ma wbudowanej funkcji json_decode (PHP starsze niż 5.2) to używamy klasy Services_JSON
 
 = 0.5.0 =
 * możliwość użycia WP-Blip! jako widgetu (ciągle można używać w wersji bez-widgetowej!) (issue #1)
