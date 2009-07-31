@@ -41,14 +41,93 @@ function wp_blip_debug () {
     echo '</pre>';
 }
 
+function wp_blip_onerror ($e, $msg) {
+    if (wp_blip_get_options ('onerror_notified') == $msg) {
+        return $msg;
+    }
+    update_option ('wp_blip_onerror_notified', $msg);
+
+    ## jesli nie ma podanego maila, to nic nie robimy, zwracamy ten sam komunikat
+    if (!($email = wp_blip_get_options ('onerror_email'))) {
+        return $msg;
+    }
+
+    $email_body = sprintf ('%s
+W trakcie działania wtyczki do systemu WordPress: WP-Blip! wystąpił błąd. Może być on spowodowany błędami w samej wtyczce, działaniu serwerów Blip.pl, lub wieloma innymi rzeczami. Komunikat jaki został wygenerowany:
+%s
+
+Jeśli uważasz, że błąd dotyczy działania wtyczki, proszę prześlij mi tego maila na adres:
+marcin@urzenia.net
+
+Zareaguję tak szybko jak to tylko możliwe :)
+
+Cały kontekst błędu jaki wystąpił:
+Wyjątek: %s
+Treść: %s
+Kod: %s
+Plik: %s
+Linia: %s
+
+%s',
+
+        strftime ('%H:%M:%S %d-%m-%Y'),
+        $msg,
+        get_class ($e),
+        $e->getMessage (),
+        $e->getCode (),
+        $e->getFile (),
+        $e->getLine (),
+        $e->getTraceAsString ()
+    );
+
+    $headers = array (
+        'From: ' . get_bloginfo ('admin_email'),
+        'Content-type: text/plain;charset=utf-8',
+    );
+    @mail ($email, 'Błąd WP-Blip!', $email_body, join ("\n", $headers));
+    return $msg;
+}
+
 ## funkcje główne
-function wp_blip ($join="\n", $echo=0) {
+function wp_blip ($join="\n", $echo=0, $on_error='wp_blip_onerror') {
     $options = wp_blip_get_options ();
 	if (!$options['login']) {
 		return false;
 	}
 
-	$updates = wp_blip_cache ();
+    $exc = null;
+    try {
+        $updates = wp_blip_cache ();
+
+        if ($options['onerror_notified']) {
+            update_option ('wp_blip_onerror_notified', '');
+        }
+    }
+    catch (Exception $exc) {
+        if (defined ('WP_BLIP_DEBUG') && WP_BLIP_DEBUG) {
+            throw $exc;
+        }
+    }
+
+    ## obsluga bledow
+    if (!is_null ($exc) && is_a ($exc, 'Exception')) {
+        $msg = null;
+        if (is_a ($exc, 'RuntimeException') && $exc->getCode () == 403) {
+            $msg = 'Wystąpił błąd przy próbie połączenia z serwerami Blip.pl.';
+        }
+        else {
+            $msg = sprintf ('Wystąpił błąd: [%d] %s', $exc->getCode (), $exc->getMessage ());
+        }
+
+        if ($on_error && is_callable ($on_error)) {
+            $msg = call_user_func ($on_error, $exc, $msg);
+        }
+
+        if ($echo && $msg) {
+            echo $msg;
+        }
+        return $msg;
+    }
 
 	$pat        = array ('%date', '%body', '%url');
     $ret        = array ();
@@ -111,7 +190,7 @@ function wp_blip_cache () {
         $bapi = wp_blip_connect ();
 
         ## pobieramy statusy
-		$statuses = $bapi->status_read (null, $options['login'], array (), false, $options['quant']);
+        $statuses = $bapi->status_read (null, $options['login'], array (), false, $options['quant']);
 
         ## jeśli filtrujemy po tagach:
         if ($options['tags']) {
@@ -189,7 +268,7 @@ function wp_blip_connect () {
         }
 
 		$bapi->connect ();
-		$bapi->uagent = 'WP Blip!/0.5.1 (http://wp-blip.googlecode.com)';
+		$bapi->uagent = 'WP Blip!/0.5.5 (http://wp-blip.googlecode.com)';
     }
 
     return $bapi;
@@ -289,6 +368,8 @@ function wp_blip_get_options ($keys = null) {
             'tpl_container_post'        => '</ul>',
             'expand_rdir'               => false,
             'expand_linked_statuses'    => false,
+            'onerror_email'             => '',
+            'onerror_notified'          => '',
         );
 
         foreach ($options as $option => &$default) {
@@ -434,10 +515,13 @@ function _wp_blip_linkify__callback ($match) {
         if ($opts['expand_rdir']) {
             $link       = explode ('/', $match[1]);
 
-            $bapi       = wp_blip_connect ();
-            $link_data  = $bapi->shortlink_read ($link[1]);
-            if ($link_data['status_code'] == 200) {
-                $link_href = $link_data['body']->original_link;
+            try {
+                $bapi       = wp_blip_connect ();
+                $link_data  = $bapi->shortlink_read ($link[1]);
+                if ($link_data['status_code'] == 200) {
+                    $link_href = $link_data['body']->original_link;
+                }
+            } catch (RuntimeException $e) {
             }
         }
 
@@ -448,11 +532,14 @@ function _wp_blip_linkify__callback ($match) {
         $title      = '';
 
         if ($opts['expand_linked_statuses'] && $link[1] == 's') {
-            $bapi       = wp_blip_connect ();
-            $st_data    = $bapi->status_read ($link[2]);
-            if ($st_data['status_code'] == 200) {
-                $title = explode ('/', $st_data['body']->user_path);
-                $title = htmlspecialchars ('^'. $title[2] .': '. $st_data['body']->body);
+            try {
+                $bapi       = wp_blip_connect ();
+                $st_data    = $bapi->status_read ($link[2]);
+                if ($st_data['status_code'] == 200) {
+                    $title = explode ('/', $st_data['body']->user_path);
+                    $title = htmlspecialchars ('^'. $title[2] .': '. $st_data['body']->body);
+                }
+            } catch (RuntimeException $e) {
             }
         }
 

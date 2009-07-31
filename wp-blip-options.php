@@ -28,7 +28,7 @@ div.wp_blip dd {
 		<table class="form-table">
 			<tr valign="top">
 				<th scope="row"><label for="wp_blip_login">Użytkownik w serwisie <a href="http://blip.pl">Blip!</a>:</label></th>
-				<td><input type="text" name="wp_blip_login" id="wp_blip_login" value="<?php echo htmlentities2 (get_option ('wp_blip_login')) ?>" />
+				<td><input type="text" name="wp_blip_login" id="wp_blip_login" value="<?php echo htmlentities2 ($wp_blip_options['login']) ?>" />
 				</td>
 			</tr>
 			<tr valign="top">
@@ -134,6 +134,11 @@ div.wp_blip dd {
 				</td>
 			</tr>
 			<tr valign="top">
+				<th scope="row"><label for="wp_blip_onerror_email">W razie błędu wyślij powiadomienie na adres:</label></th>
+				<td><input type="text" name="wp_blip_onerror_email" id="wp_blip_onerror_email" value="<?php echo htmlentities2 ($wp_blip_options['onerror_email']) ?>" />
+				</td>
+			</tr>
+			<tr valign="top">
 				<th scope="row">Wyczyść cache:</th>
                 <td><a href="<?php echo get_bloginfo('wpurl'); ?>/wp-content/plugins/wp-blip/wp-blip-ajax.php?ajax=1&amp;action=cache_invalidate"
                     onclick="jQuery.get (this.href, {}, function (d, s) {alert (d);}); return false">wyczyść</a></td>
@@ -142,7 +147,7 @@ div.wp_blip dd {
 		<p class="submit">
             <input type="submit" class="button-primary" value="<?php _e('Save Changes') ?>" />
 		    <input type="hidden" name="action" value="update" />
-		    <input type="hidden" name="page_options" value="wp_blip_login,wp_blip_quant,wp_blip_time,wp_blip_tpl,wp_blip_dateformat,wp_blip_tags,wp_blip_tpl_container_pre,wp_blip_tpl_container_post,wp_blip_expand_rdir,wp_blip_expand_linked_statuses,wp_blip_datetype" />
+		    <input type="hidden" name="page_options" value="wp_blip_login,wp_blip_quant,wp_blip_time,wp_blip_tpl,wp_blip_dateformat,wp_blip_tags,wp_blip_tpl_container_pre,wp_blip_tpl_container_post,wp_blip_expand_rdir,wp_blip_expand_linked_statuses,wp_blip_datetype,wp_blip_onerror_email" />
         </p>
 	</form>
 </div>
