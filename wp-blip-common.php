@@ -84,7 +84,7 @@ Linia: %s
         'From: ' . get_bloginfo ('admin_email'),
         'Content-type: text/plain;charset=utf-8',
     );
-    @mail ($email, 'Błąd WP-Blip!', $email_body, join ("\n", $headers));
+    @mail ($email, '=?UTF-8?B?QsWCxIVkIFdQLUJsaXAh?=', $email_body, join ("\n", $headers));
     return $msg;
 }
 
