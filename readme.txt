@@ -2,7 +2,7 @@
 Contributors: mysz
 Tags: blip, microblogging, widget
 Requires at least: 2.7
-Tested up to: 2.8
+Tested up to: 2.9.1
 Stable tag: 0.5.6
 
 WP-Blip! służy do wyświetlania ostatnich wpisów z Blip!a w Wordpressie.
