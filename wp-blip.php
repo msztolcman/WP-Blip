@@ -3,7 +3,7 @@
  * Plugin Name: WP-Blip!
  * Plugin URI: http://wp-blip.googlecode.com
  * Description: Wtyczka wyświetla ostatnie wpisy z <a href="http://blip.pl">blip.pl</a> (<a href="options-general.php?page=WP-Blip">skonfiguruj</a>).
- * Version: 0.5.6
+ * Version: 0.5.7
  * Author: Marcin 'MySZ' Sztolcman
  * Author URI: http://urzenia.net/
  * SVNVersion: $Id$
@@ -25,7 +25,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
-
 
 define ('WP_BLIP_DEBUG', false);
 
