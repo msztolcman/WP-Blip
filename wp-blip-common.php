@@ -190,7 +190,11 @@ function wp_blip_cache () {
         $bapi = wp_blip_connect ();
 
         ## pobieramy statusy
-        $statuses = $bapi->status_read (null, $options['login'], array (), false, $options['quant']);
+        $status         = new BlipApi_Status ();
+        $status->user   = $options['login'];
+        $status->limit  = (int)$options['quant'];
+        $statuses       = $bapi->read ($status);
+        unset ($status);
 
         ## jeśli filtrujemy po tagach:
         if ($options['tags']) {
@@ -201,10 +205,16 @@ function wp_blip_cache () {
             $statuses = _wp_blip_filter_statuses_by_tags ($options['tags'], $statuses['body']);
 
             ## szukamy pozostałych statusów jeśli trzeba
-            $offset = $options['quant'];
+            $offset = (int)$options['quant'];
             while (count ($statuses) < $options['quant']) {
-		        $filtered = $bapi->status_read (null, $options['login'], array (), false, 20, $offset);
-                $filtered = _wp_blip_filter_statuses_by_tags ($options['tags'], $filtered['body']);
+                if (!$status) {
+                    $status         = new BlipApi_Status ();
+                    $status->user   = $options['login'];
+                    $status->limit  = 20;
+                }
+                $status->offset     = $offset;
+		        $filtered           = $bapi->read ($status);
+                $filtered           = _wp_blip_filter_statuses_by_tags ($options['tags'], $filtered['body']);
                 if (count ($filtered)) {
                     $statuses = array_merge ($statuses, $filtered);
                 }
@@ -254,11 +264,11 @@ function wp_blip_connect () {
             ## brzydki hack - dotychczas w blipapi.php nie dalo sie latwo zmienic funkcji parsujacej json
             ## w nowej wersji bedzie to poprawione, i ten hack nie bedzie potrzebny
             class WPBlipAPI extends BlipApi {
-                public function __construct ($login=null, $passwd=null, $dont_connect=false) {
+                public function __construct () {
                     $json = new Services_JSON ();
                     $this->_parsers['application/json'] = array ($json, 'decode');
 
-                    return parent::__construct ($login, $passwd, $dont_connect);
+                    return parent::__construct ();
                 }
             }
             $bapi = new WPBlipAPI ();
@@ -268,7 +278,7 @@ function wp_blip_connect () {
         }
 
 		$bapi->connect ();
-		$bapi->uagent = 'WP Blip!/0.5.5 (http://wp-blip.googlecode.com)';
+		$bapi->uagent = 'WP Blip!/0.6.0 (http://wp-blip.googlecode.com)';
     }
 
     return $bapi;
@@ -516,8 +526,10 @@ function _wp_blip_linkify__callback ($match) {
             $link       = explode ('/', $match[1]);
 
             try {
-                $bapi       = wp_blip_connect ();
-                $link_data  = $bapi->shortlink_read ($link[1]);
+                $bapi           = wp_blip_connect ();
+                $shlink         = new BlipApi_Shortlink ();
+                $shlink->code   = $link[1];
+                $link_data      = $bapi->read ($shlink);
                 if ($link_data['status_code'] == 200) {
                     $link_href = $link_data['body']->original_link;
                 }
@@ -534,7 +546,9 @@ function _wp_blip_linkify__callback ($match) {
         if ($opts['expand_linked_statuses'] && $link[1] == 's') {
             try {
                 $bapi       = wp_blip_connect ();
-                $st_data    = $bapi->status_read ($link[2]);
+                $status     = new BlipApi_Status ();
+                $status->id = (int)$link[2];
+                $st_data    = $bapi->read ($status);
                 if ($st_data['status_code'] == 200) {
                     $title = explode ('/', $st_data['body']->user_path);
                     $title = htmlspecialchars ('^'. $title[2] .': '. $st_data['body']->body);
