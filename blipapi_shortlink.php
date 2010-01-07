@@ -4,8 +4,8 @@
  * Blip! (http://blip.pl) communication library.
  *
  * @author Marcin Sztolcman <marcin /at/ urzenia /dot/ net>
- * @version 0.02.15
- * @version $Id: blipapi_shortlink.php 39 2009-03-27 23:38:41Z urzenia $
+ * @version 0.02.30
+ * @version $Id: blipapi_shortlink.php 133 2010-01-06 16:46:21Z urzenia $
  * @copyright Copyright (c) 2007, Marcin Sztolcman
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License v.2
  * @package blipapi
@@ -15,53 +15,151 @@
  * Blip! (http://blip.pl) communication library.
  *
  * @author Marcin Sztolcman <marcin /at/ urzenia /dot/ net>
- * @version 0.02.15
- * @version $Id: blipapi_shortlink.php 39 2009-03-27 23:38:41Z urzenia $
+ * @version 0.02.30
+ * @version $Id: blipapi_shortlink.php 133 2010-01-06 16:46:21Z urzenia $
  * @copyright Copyright (c) 2007, Marcin Sztolcman
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License v.2
  * @package blipapi
  */
 
 if (!class_exists ('BlipApi_Shortlink')) {
-    class BlipApi_Shortlink implements IBlipApi_Command {
+    class BlipApi_Shortlink extends BlipApi_Abstract implements IBlipApi_Command {
         /**
-        * Get shortlinks from Blip!'s rdir system
-        *
-        * @param string $code code from shortlink, i.e. http://rdir.pl/f0j0 -> $code = f0j0
-        * @param int $since_id status ID - will return statuses with newest ID then it
-        * @param int $limit
-        * @param int $offset
-        * @access public
-        * @return array parameters for BlipApi::__query
-        */
-        public static function read ($code=null, $since_id=null, $limit=10, $offset=0) {
-            $url = '/shortlinks';
-            if (!is_null ($code)) {
-                $url .= '/' . $code;
+         * Code from rdir.pl to decode
+         *
+         * @access protected
+         * @var string
+         */
+        protected $_code;
+
+        /**
+         * Limit read results to $_limit items
+         *
+         * @access protected
+         * @var int
+         */
+        protected $_limit       = 10;
+
+        /**
+         * URL to encode
+         *
+         * @access protected
+         * @var string
+         */
+        protected $_link;
+
+        /**
+         * Offset for read result set
+         *
+         * @access protected
+         * @var int
+         */
+        protected $_offset      = 0;
+
+        /**
+         * ID of item where data is being set.
+         *
+         * @access protected
+         * @var int
+         */
+        protected $_since_id;
+
+        /**
+         * Setter for field: code
+         *
+         * @param string $value
+         * @access protected
+         */
+        protected function __set_code ($value) {
+            $this->_code = $value;
+        }
+
+        /**
+         * Setter for field: limit
+         *
+         * @param string $value
+         * @access protected
+         */
+        protected function __set_limit ($value) {
+            $this->_limit = $this->__validate_limit ($value);
+        }
+
+        /**
+         * Setter for field: link
+         *
+         * @param string $value
+         * @access protected
+         */
+        protected function __set_link ($value) {
+            $this->_link = $value;
+        }
+
+        /**
+         * Setter for field: offset
+         *
+         * @param string $value
+         * @access protected
+         */
+        protected function __set_offset ($value) {
+            $this->_offset = $this->__validate_int ($value, 'offset');
+        }
+
+        /**
+         * Setter for field: since_id
+         *
+         * @param string $value
+         * @access protected
+         */
+        protected function __set_since_id ($value) {
+            $this->_since_id = $this->__validate_int ($value, 'since ID');
+        }
+
+        /**
+         * Create shortlink
+         *
+         * Throws InvalidArgumentException if url is missing.
+         *
+         * @access public
+         * @return array parameters for BlipApi::__call
+         */
+        public function create () {
+            if (!$this->_link) {
+                throw new InvalidArgumentException ("Url is missing.");
             }
-            else if ($since_id) {
-                $url .= "/$since_id/all_since";
+
+            $url = '/shortlinks';
+            $data = array ();
+            $data['shortlink[original_link]'] = $this->_link;
+
+            return array ($url, 'post', $data);
+        }
+
+        /**
+         * Get shortlinks from Blip!'s rdir system
+         *
+         * @access public
+         * @return array parameters for BlipApi::__call
+         */
+        public function read () {
+            if ($this->_code) {
+                $url = "/shortlinks/$this->_code";
+            }
+            else if ($this->_since_id) {
+                $url = "/shortlinks/$this->_since_id/all_since";
             }
             else {
-                $url .= '/all';
+                $url = '/shortlinks/all';
             }
 
             $params = array ();
-
-            $limit = (int)$limit;
-            if ($limit) {
-                $params['limit'] = $limit;
+            if ($this->_limit) {
+                $params['limit'] = $this->_limit;
             }
-            $offset = (int)$offset;
-            if ($offset) {
-                $params['offset'] = $offset;
+            if ($this->_offset) {
+                $params['offset'] = $this->_offset;
             }
 
-            if (count ($params)) {
-                $url .= '?'.BlipApi__arr2qstr ($params);
-            }
-
-            return array ($url, 'get');
+            return array ($url, 'get', $params);
         }
     }
 }
