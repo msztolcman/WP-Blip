@@ -6,10 +6,19 @@
  * $Id$
  */
 
+require_once 'blipapi.php';
+
 define ('WP_BLIP', true);
+define ('WP_BLIP_VERSION', '0.5.7');
+
+if (defined ('WP_BLIP_DEBUG') && WP_BLIP_DEBUG) {
+    error_reporting (E_ALL|E_STRICT|E_DEPRECATED);
+    ini_set ('display_errors', true);
+}
 
 set_include_path (get_include_path() . PATH_SEPARATOR . dirname (__FILE__));
 
+## ustalamy miejsce zapisu cache
 $wp_blip_cacheroot  = dirname (__FILE__);
 if (
     (!is_dir ($wp_blip_cacheroot) || !is_writeable ($wp_blip_cacheroot)) &&
@@ -18,6 +27,7 @@ if (
     $wp_blip_cacheroot = sys_get_temp_dir ();
 }
 
+## zestaw pliterek w UTF-8
 $wp_blip_plchars    =
     "\xc4\x84\xc4\x85". ## Ąą
     "\xc4\x86\xc4\x87". ## Ćć
@@ -30,6 +40,20 @@ $wp_blip_plchars    =
     "\xc5\xb9\xc5\xba"; ## Źź
 
 $wp_blip_asciichars =   'AaCcEeLlNnOoSsZzZz';
+
+## hack dla starszej wersji blipapi w WP-BlipBot
+class WPBlipApi_Status extends BlipApi_Status {
+    public function read () {
+        $ret = parent::read ();
+
+        if (count ($ret) >= 3 && count ($ret[2]) && strpos ($ret[0], '?') !== false) {
+            $ret[0] .= '?' . http_build_query ($ret[2]);
+        }
+
+        return $ret;
+    }
+}
+## koniec hacka
 
 function wp_blip_debug () {
     $args = func_get_args ();
@@ -110,9 +134,9 @@ function wp_blip ($join="\n", $echo=0, $on_error='wp_blip_onerror') {
     }
 
     ## obsluga bledow
-    if (!is_null ($exc) && is_a ($exc, 'Exception')) {
+    if (!is_null ($exc) && $exc instanceof Exception) {
         $msg = null;
-        if (is_a ($exc, 'RuntimeException') && $exc->getCode () == 403) {
+        if ($exc instanceof RuntimeException && $exc->getCode () == 403) {
             $msg = 'Wystąpił błąd przy próbie połączenia z serwerami Blip.pl.';
         }
         else {
@@ -164,6 +188,7 @@ function wp_blip_cache () {
 		return false;
 	}
 
+    ## musimy miec zapisywalny katalog dla cache
     if (!is_dir ($GLOBALS['wp_blip_cacheroot']) || !is_writeable ($GLOBALS['wp_blip_cacheroot'])) {
         trigger_error ('WP-Blip! cannot write cache file in '. $GLOBALS['wp_blip_cacheroot'] .' directory.', E_USER_NOTICE);
     }
@@ -172,83 +197,89 @@ function wp_blip_cache () {
 
 	$ret = array ();
     if (
+        ## nie uzywamy cache w trybie debug
         (!defined ('WP_BLIP_DEBUG') || !WP_BLIP_DEBUG) &&
+        ## nie uzywamy cache jesli user nie zdefiniowal czasu
         $options['time'] &&
+        ## cache istnieje
         file_exists ($cachefile) &&
+        ## cache jest aktualny
         (filemtime ($cachefile) + $options['time']) > time () &&
+        ## nie wymuszamy odswiezenie, bez cache
         (!isset ($_ENV['HTTP_CACHE_CONTROL']) || strtolower ($_ENV['HTTP_CACHE_CONTROL']) != 'no-cache')
     ) {
-
+        ## zatem  wracamy dane z cache
 		return unserialize (stripslashes (file_get_contents ($cachefile)));
 	}
-	else {
-		if (!$options['quant']) {
-			$options['quant'] = 10;
-			update_option ('wp_blip_quant', $options['quant']);
-		}
 
-        $bapi = wp_blip_connect ();
+    if (!$options['quant']) {
+        $options['quant'] = 10;
+        update_option ('wp_blip_quant', $options['quant']);
+    }
 
-        ## pobieramy statusy
-        $status         = new BlipApi_Status ();
-        $status->user   = $options['login'];
-        $status->limit  = (int)$options['quant'];
-        $statuses       = $bapi->read ($status);
-        unset ($status);
+    $bapi = wp_blip_connect ();
 
-        ## jeśli filtrujemy po tagach:
-        if ($options['tags']) {
-            ## rozdzielamy tagi
-            $options['tags'] = preg_split ('!\s!', $options['tags']);
+    ## pobieramy statusy
+    $status         = new WPBlipApi_Status ();
+    $status->user   = $options['login'];
+    $status->limit  = (int)$options['quant'];
+    $statuses       = $bapi->read ($status);
 
-            ## odfiltrowujemy niechciane statusy
-            $statuses = _wp_blip_filter_statuses_by_tags ($options['tags'], $statuses['body']);
+    $status         = null;
 
-            ## szukamy pozostałych statusów jeśli trzeba
-            $offset = (int)$options['quant'];
-            while (count ($statuses) < $options['quant']) {
-                if (!$status) {
-                    $status         = new BlipApi_Status ();
-                    $status->user   = $options['login'];
-                    $status->limit  = 20;
-                }
-                $status->offset     = $offset;
-		        $filtered           = $bapi->read ($status);
-                $filtered           = _wp_blip_filter_statuses_by_tags ($options['tags'], $filtered['body']);
-                if (count ($filtered)) {
-                    $statuses = array_merge ($statuses, $filtered);
-                }
-                $offset += 20;
+    ## jeśli filtrujemy po tagach:
+    if ($options['tags']) {
+        ## rozdzielamy tagi
+        $options['tags'] = preg_split ('!\s!', $options['tags']);
+
+        ## odfiltrowujemy niechciane statusy
+        $statuses = _wp_blip_filter_statuses_by_tags ($options['tags'], $statuses['body']);
+
+        ## szukamy pozostałych statusów jeśli trzeba
+        $offset = (int)$options['quant'];
+        while (count ($statuses) < $options['quant']) {
+            if (!$status) {
+                $status         = new WPBlipApi_Status ();
+                $status->user   = $options['login'];
+                $status->limit  = 20;
             }
+            $status->offset     = $offset;
+            $filtered           = $bapi->read ($status);
+
+            $filtered           = _wp_blip_filter_statuses_by_tags ($options['tags'], $filtered['body']);
+            if (count ($filtered)) {
+                $statuses = array_merge ($statuses, $filtered);
+            }
+            $offset += 20;
 
             ## jak za dużo to ucinamy nadmiarowe statusy
             if (count ($statuses) > $options['quant']) {
                 $statuses = array_splice ($statuses, 0, $options['quant']);
             }
         }
-        else {
-            $statuses = $statuses['body'];
-        }
+    }
+    else {
+        $statuses = $statuses['body'];
+    }
 
-		$save = array ();
-		foreach ($statuses as $status) {
-            $date = preg_split ('#[: -]#', $status->created_at);
-			$save[] = array (
-				'created_at'	=> mktime ($date[3], $date[4], $date[5], $date[1], $date[2], $date[0]),
-                'body'			=> wp_blip_linkify (
-                    htmlspecialchars ($status->body),
-                    array (
-                        'expand_rdir'               => $options['expand_rdir'],
-                        'expand_linked_statuses'    => $options['expand_linked_statuses'],
-                    )
-                ),
-				'id'			=> $status->id,
-			);
-		}
+    $save = array ();
+    foreach ($statuses as $status) {
+        $date = preg_split ('#[: -]#', $status->created_at);
+        $save[] = array (
+            'created_at'	=> mktime ($date[3], $date[4], $date[5], $date[1], $date[2], $date[0]),
+            'id'			=> $status->id,
+            'body'			=> wp_blip_linkify (
+                htmlspecialchars ($status->body),
+                array (
+                    'expand_rdir'               => $options['expand_rdir'],
+                    'expand_linked_statuses'    => $options['expand_linked_statuses'],
+                )
+            ),
+        );
+    }
 
-		@file_put_contents ($cachefile, serialize ($save), LOCK_EX);
-		return $save;
-	}
+    @file_put_contents ($cachefile, serialize ($save), LOCK_EX);
+    return $save;
 }
 
 
@@ -257,8 +288,6 @@ function wp_blip_connect () {
     static $bapi;
 
     if (is_null ($bapi)) {
-		require_once 'blipapi.php';
-
         if (!function_exists ('json_decode')) {
             require_once 'JSON.class.php';
             ## brzydki hack - dotychczas w blipapi.php nie dalo sie latwo zmienic funkcji parsujacej json
@@ -278,7 +307,7 @@ function wp_blip_connect () {
         }
 
 		$bapi->connect ();
-		$bapi->uagent = 'WP Blip!/0.6.0 (http://wp-blip.googlecode.com)';
+		$bapi->uagent = 'WP Blip!/'. WP_BLIP_VERSION .' (http://wp-blip.googlecode.com)';
     }
 
     return $bapi;
@@ -300,38 +329,44 @@ function wp_blip_date_absolute ($ts, $options) {
 function wp_blip_date_relative ($ts, $options) {
     $time_diff = time () - $ts;
 
-    if ($time_diff > (86400 * 365)) {
+    if ($time_diff > (86400 * $options['absolute_from'])) {
         return wp_blip_date_absolute ($ts, $options);
     }
 
     $ret = array ();
-    if ($time_diff > (86400 * 30)) { ## miesiące
-        $data = floor ($time_diff / 86400 / 30);
-        $ret[] = _wp_blip_date_names ($data, 'm');
-        $time_diff -= $data * 86400 * 30;
+    ## miesiace
+    if ($time_diff > (86400 * 30)) {
+        $date       = floor ($time_diff / 86400 / 30);
+        $ret[]      = _wp_blip_date_names ($date, 'm');
+        $time_diff  -= $date * 86400 * 30;
     }
-    if ($time_diff > (86400 * 7)) { ## tygodnie
-        $data = floor ($time_diff / 86400 / 7);
-        $ret[] = _wp_blip_date_names ($data, 'w');
-        $time_diff -= $data * 86400 * 7;
+    ## tygodnie
+    if ($time_diff > (86400 * 7)) {
+        $date       = floor ($time_diff / 86400 / 7);
+        $ret[]      = _wp_blip_date_names ($date, 'w');
+        $time_diff  -= $date * 86400 * 7;
     }
-    if ($time_diff > 86400) { ## dni
-        $data = floor ($time_diff / 86400);
-        $ret[] = _wp_blip_date_names ($data, 'd');
-        $time_diff -= $data * 86400;
+    ## dni
+    if ($time_diff > 86400) {
+        $date       = floor ($time_diff / 86400);
+        $ret[]      = _wp_blip_date_names ($date, 'd');
+        $time_diff  -= $date * 86400;
     }
-    if ($time_diff > (3600)) { ## godziny
-        $data = floor ($time_diff / 3600);
-        $ret[] = _wp_blip_date_names ($data, 'H');
-        $time_diff -= $data * 3600;
+    ## godziny
+    if ($time_diff > (3600)) {
+        $date       = floor ($time_diff / 3600);
+        $ret[]      = _wp_blip_date_names ($date, 'H');
+        $time_diff  -= $date * 3600;
     }
-    if ($time_diff > 60) { ## minuty
-        $data = floor ($time_diff / 60);
-        $ret[] = _wp_blip_date_names ($data, 'M');
-        $time_diff -= $data * 60;
+    ## minuty
+    if ($time_diff > 60) {
+        $date       = floor ($time_diff / 60);
+        $ret[]      = _wp_blip_date_names ($date, 'M');
+        $time_diff  -= $date * 60;
     }
-    if ($time_diff > 0) { ## sekundy
-        $ret[] = _wp_blip_date_names ($time_diff, 'S');
+    ## sekundy
+    if ($time_diff > 0) {
+        $ret[]      = _wp_blip_date_names ($time_diff, 'S');
     }
 
     return join (', ', $ret);
@@ -339,13 +374,13 @@ function wp_blip_date_relative ($ts, $options) {
 
 function wp_blip_date_relative_simple ($ts, $options) {
     $time_diff = time () - $ts;
-    if ($time_diff/31536000 >= 1) {
+    if ($time_diff/86400/365 >= 1) {
         return _wp_blip_date_names (floor ($time_diff/31536000), 'y');
     }
-    elseif ($time_diff/2592000 >= 1) {
+    elseif ($time_diff/86400/30 >= 1) {
         return _wp_blip_date_names (floor ($time_diff/2592000), 'm');
     }
-    elseif ($time_diff/604800 >= 1) {
+    elseif ($time_diff/86400/7 >= 1) {
         return _wp_blip_date_names (floor ($time_diff/604800), 'w');
     }
     elseif ($time_diff/86400 >= 1) {
@@ -380,6 +415,8 @@ function wp_blip_get_options ($keys = null) {
             'expand_linked_statuses'    => false,
             'onerror_email'             => '',
             'onerror_notified'          => '',
+            'version'                   => WP_BLIP_VERSION,
+            'absolute_from'             => 365,
         );
 
         foreach ($options as $option => &$default) {
@@ -391,6 +428,12 @@ function wp_blip_get_options ($keys = null) {
 
         if (get_option ('wp_blip_password') !== false) {
             delete_option ('wp_blip_password');
+        }
+
+        $version = get_option ('wp_blip_version');
+        if ($version === false || $version != WP_BLIP_VERSION) {
+            wp_blip_version_change ($version);
+            update_option ('wp_blip_version', WP_BLIP_VERSION);
         }
     }
 
@@ -445,6 +488,12 @@ function wp_blip_utf2ascii ($str) {
     );
 }
 
+function wp_blip_version_change ($old_version) {
+    foreach (glob ($GLOBALS['wp_blip_cacheroot'] .'/wp_blip.*.cache.txt') as $file) {
+        @unlink ($file);
+    }
+}
+
 
 ## funkcje pomocnicze (callbacki)
 function _wp_blip_date_names ($ts, $unit) {
@@ -459,7 +508,7 @@ function _wp_blip_date_names ($ts, $unit) {
     );
 
     if ($ts == 1) {
-        return $units[$unit][0];
+        return 1 .' '. $units[$unit][0];
     }
 
     $ts = $ts % 100;
@@ -504,7 +553,7 @@ function _wp_blip_find_tags ($status) {
 function _wp_blip_get_cache_filename () {
     $options = wp_blip_get_options ();
 
-	return $GLOBALS['wp_blip_cacheroot'] . '/' . $options['login'] . '_' . $options['quant'] . '.cache.txt';
+	return $GLOBALS['wp_blip_cacheroot'] .'/wp_blip.'. $options['login'] .'_'. $options['quant'] .'.cache.txt';
 }
 
 function _wp_blip_linkify__callback ($match) {
