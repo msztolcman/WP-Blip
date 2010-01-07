@@ -3,7 +3,7 @@ Contributors: mysz
 Tags: blip, microblogging, widget
 Requires at least: 2.7
 Tested up to: 2.9.1
-Stable tag: 0.5.6
+Stable tag: 0.5.7
 
 WP-Blip! służy do wyświetlania ostatnich wpisów z Blip!a w Wordpressie.
 
@@ -51,6 +51,13 @@ Niestety nie. Ale jest podobne rozszerzenie, nazywa się [Blip Widget](http://wo
 2. Panel administracyjny
 
 == Changelog ==
+= 0.5.7 =
+* poprawienie kompatybilności z WP BlipBot - jest tam starsza wersja blipapi.php
+* zapisywanie wersji WP-Blip! w bazie danych
+* czyszczenie plikow cache przy zmianie wersji
+* poprawki związane z E_STRICT
+* zmiana nazwy pliku cache. Teraz pliki z cache mają prefix 'wp_blip.'
+
 = 0.5.6 =
 * załączenie najnowszej wersji BlipApi.php
 
