@@ -3,7 +3,7 @@ Contributors: mysz
 Tags: blip, microblogging, widget
 Requires at least: 2.7
 Tested up to: 2.8
-Stable tag: 0.5.5
+Stable tag: 0.5.6
 
 WP-Blip! służy do wyświetlania ostatnich wpisów z Blip!a w Wordpressie.
 
@@ -42,11 +42,18 @@ Proszę o zgłaszanie wszelkich uwag i problemów na tagu [#wpblip](http://blip.
 
 Ponieważ dla każdego linku z osobna trzeba pobrać dodatkowe dane z serwisu Blip!
 
+= Na moim serwerze nie ma rozszerzenia cURL, czy można jakoś tam uruchomić WP-Blip! ? =
+
+Niestety nie. Ale jest podobne rozszerzenie, nazywa się [Blip Widget](http://wordpress.org/extend/plugins/blip-widget/). Blip Widget korzysta z innego sposobu pobierania wpisów, dzięki czemu powinno działać u Ciebie :)
+
 == Screenshots ==
 1. Rozwinięty widget WP-Blip!
 2. Panel administracyjny
 
 == Changelog ==
+= 0.5.6 =
+* załączenie najnowszej wersji BlipApi.php
+
 = 0.5.5 =
 * brakowalo poprawnej obsługi błędów połączenia z serwerami Blip.pl
 * przy wystąpieniu błędu zostanie wysłany email z informacją o błędzie pod adres podany w panelu administracyjnym (o każdym błędzie użytkownik jest informowany tylko raz)
@@ -90,5 +97,5 @@ Ponieważ dla każdego linku z osobna trzeba pobrać dodatkowe dane z serwisu Bl
 
 == Wymagania ==
 * PHP w wersji 5.2 lub wyżej
-* działające rozszerzenie PHP curl
+* działające rozszerzenie PHP cURL
 
