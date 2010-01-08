@@ -37,7 +37,7 @@ function wp_blip_admin_actions () {
 }
 
 function wp_blip_option_page () {
-	include_once 'wp-blip-options.php';
+    include_once 'wp-blip-options.php';
 }
 
 add_action ('admin_menu', 'wp_blip_admin_actions');
