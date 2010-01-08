@@ -55,6 +55,7 @@ Niestety nie. Ale jest podobne rozszerzenie, nazywa się [Blip Widget](http://wo
 * usunięcie starego hacka na używanie zewnętrznego parsera (gdy nie ma funkcji json_decode)
 * poprawka na szukanie blipów w konkretnym tagu - zapętlało się gdy dany user puścił mniej blipów tak otagowanych, niż ustawił limit w panelu WP-Blip!
 * WP-Blip! sprawdza teraz uprawnienia zalogowanego użytkownika, i nie pozwala na edycję ustawień jeśli ktoś nie ma nadanych uprawnień 'manage_options' (zazwyczaj jest to administrator)
+* możliwość ustalenia, od jakiego momentu daty absolutne mają być jako relatywne (np. po 7 dni od publikacji)
 
 = 0.5.7 =
 * poprawienie kompatybilności z WP BlipBot - jest tam starsza wersja blipapi.php
