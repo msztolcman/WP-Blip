@@ -16,6 +16,30 @@ require_once 'wp-blip-common.php';
 $wp_blip_options = wp_blip_get_options ();
 
 ?>
+<script type="text/javascript">
+function wp_blip_dateformat () {
+    jQuery ('#wp_blip_dateformat').attr ('readonly',  jQuery ('#wp_blip_datetype_absolute').attr ('checked') ? '' : 'readonly');
+}
+function wp_blip_absolute_from () {
+    jQuery ('#wp_blip_absolute_from').attr ('readonly',  jQuery ('#wp_blip_datetype_absolute').attr ('checked') ? 'readonly' : '');
+}
+
+jQuery(function () {
+    wp_blip_dateformat ();
+    jQuery ('#wp_blip_datetype_relative').change (function () {
+        wp_blip_dateformat ();
+        wp_blip_absolute_from ();
+    });
+    jQuery ('#wp_blip_datetype_relative_simple').change (function () {
+        wp_blip_dateformat ();
+        wp_blip_absolute_from ();
+    });
+    jQuery ('#wp_blip_datetype_absolute').change (function () {
+        wp_blip_dateformat ();
+        wp_blip_absolute_from ();
+    });
+});
+</script>
 <style type="text/css">
 div.wp_blip dt {
     font-style: italic;
@@ -101,11 +125,19 @@ div.wp_blip dd {
                 </td>
             </tr>
             <tr valign="top">
+                <th scope="row"><label for="wp_blip_absolute_from">Absolutne od:</label></th>
+                <td><input type="text" name="wp_blip_absolute_from" id="wp_blip_absolute_from"
+                    value="<?php echo htmlentities2 ($wp_blip_options['absolute_from']) ?>"
+                    size="50" /><br />
+                    Wartość w dniach, po przekroczeniu której data będzie absolutna
+                </td>
+            </tr>
+            <tr valign="top">
                 <th scope="row"><label for="wp_blip_dateformat">Szablon daty:</label></th>
                 <td><input type="text" name="wp_blip_dateformat" id="wp_blip_dateformat"
                     value="<?php echo htmlentities2 ($wp_blip_options['dateformat']) ?>"
                     size="50" <?php $wp_blip_options['datetype'] == 'relative' ? 'disabled="disabled"' : ''; ?> /><br />
-                    Szczegóły: <a href="http://php.net/strftime">php.net/strftime</a>
+                    Szczegóły: <a href="http://php.net/strftime">php.net/strftime</a> (domyślnie: %Y-%m-%d %H:%M:%S)
                 </td>
             </tr>
             <tr valign="top">
@@ -138,7 +170,9 @@ div.wp_blip dd {
             </tr>
             <tr valign="top">
                 <th scope="row"><label for="wp_blip_onerror_email">W razie błędu wyślij powiadomienie na adres:</label></th>
-                <td><input type="text" name="wp_blip_onerror_email" id="wp_blip_onerror_email" value="<?php echo htmlentities2 ($wp_blip_options['onerror_email']) ?>" />
+                <td>
+                    <input type="text" name="wp_blip_onerror_email" id="wp_blip_onerror_email" value="<?php echo htmlentities2 ($wp_blip_options['onerror_email']) ?>" /><br />
+                    Zostaw puste jeśli nie chcesz otrzybywać powiadomień o błędach.
                 </td>
             </tr>
             <tr valign="top">
@@ -150,7 +184,7 @@ div.wp_blip dd {
         <p class="submit">
             <input type="submit" class="button-primary" value="<?php _e('Save Changes') ?>" />
             <input type="hidden" name="action" value="update" />
-            <input type="hidden" name="page_options" value="wp_blip_login,wp_blip_quant,wp_blip_time,wp_blip_tpl,wp_blip_dateformat,wp_blip_tags,wp_blip_tpl_container_pre,wp_blip_tpl_container_post,wp_blip_expand_rdir,wp_blip_expand_linked_statuses,wp_blip_datetype,wp_blip_onerror_email" />
+            <input type="hidden" name="page_options" value="wp_blip_login,wp_blip_quant,wp_blip_time,wp_blip_tpl,wp_blip_dateformat,wp_blip_tags,wp_blip_tpl_container_pre,wp_blip_tpl_container_post,wp_blip_expand_rdir,wp_blip_expand_linked_statuses,wp_blip_datetype,wp_blip_onerror_email,wp_blip_absolute_from" />
         </p>
     </form>
 </div>
