@@ -3,7 +3,7 @@ Contributors: mysz
 Tags: blip, microblogging, widget
 Requires at least: 2.7
 Tested up to: 2.9.1
-Stable tag: 0.5.7
+Stable tag: 0.5.8
 
 WP-Blip! służy do wyświetlania ostatnich wpisów z Blip!a w Wordpressie.
 
@@ -12,7 +12,7 @@ WP-Blip! służy do wyświetlania ostatnich wpisów z Blip!a w Wordpressie.
 WP-Blip! pozwala na wyświetlenie ostatnich wpisów z [BlipLoga](http://blip.pl).
 Można wyświetlać wszystkie wpisy, lub też ograniczone do dowolnego tagu. Udostępniony jest w części administracyjnej panel pozwalający na dowolną konfigurację sposoby wyświetlanych danyc, ich ilości czy innych limitów.
 
-Proszę o zgłaszanie wszelkich uwag i problemów na tagu [#wpblip](http://blip.pl/tags/wpblip) lub do użytkownika [^mysz](http://blip.pl/users/mysz/dashboard), ewentualnie można zgłosić ticketa w [Google Code](http://code.google.com/p/wp-blip/issues/list).
+Proszę o zgłaszanie wszelkich uwag i problemów na tagu [#wpblip](http://blip.pl/tags/wpblip) lub do użytkownika ^[mysz](http://blip.pl/users/mysz/dashboard), ewentualnie można zgłosić ticketa w [Google Code](http://code.google.com/p/wp-blip/issues/list).
 
 == Installation ==
 
@@ -51,6 +51,11 @@ Niestety nie. Ale jest podobne rozszerzenie, nazywa się [Blip Widget](http://wo
 2. Panel administracyjny
 
 == Changelog ==
+= 0.5.8 =
+* usunięcie starego hacka na używanie zewnętrznego parsera (gdy nie ma funkcji json_decode)
+* poprawka na szukanie blipów w konkretnym tagu - zapętlało się gdy dany user puścił mniej blipów tak otagowanych, niż ustawił limit w panelu WP-Blip!
+* WP-Blip! sprawdza teraz uprawnienia zalogowanego użytkownika, i nie pozwala na edycję ustawień jeśli ktoś nie ma nadanych uprawnień 'manage_options' (zazwyczaj jest to administrator)
+
 = 0.5.7 =
 * poprawienie kompatybilności z WP BlipBot - jest tam starsza wersja blipapi.php
 * zapisywanie wersji WP-Blip! w bazie danych
