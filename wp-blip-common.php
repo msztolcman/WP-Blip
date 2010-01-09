@@ -153,6 +153,10 @@ function wp_blip ($join="\n", $echo=0, $on_error='wp_blip_onerror') {
         return $msg;
     }
 
+    if ($updates === false) {
+        return;
+    }
+
     $pat        = array ('%date', '%body', '%url');
     $ret        = array ();
     $date_fun   = 'wp_blip_date_' . $options['datetype'];
@@ -220,12 +224,13 @@ function wp_blip_cache () {
     $bapi = wp_blip_connect ();
 
     ## pobieramy statusy
-    $status         = new WPBlipApi_Status ();
-    $status->user   = $options['login'];
-    $status->limit  = (int)$options['quant'];
-    $statuses       = $bapi->read ($status);
+    $status             = new WPBlipApi_Status ();
+    $status->user       = $options['login'];
+    $status->limit      = (int)$options['quant'];
+    $status->include    = array ('pictures');
+    $statuses           = $bapi->read ($status);
 
-    $status         = null;
+    $status             = null;
 
     ## jeśli filtrujemy po tagach:
     if ($options['tags']) {
@@ -242,12 +247,13 @@ function wp_blip_cache () {
             ## przypierwszej iteracji petli $status jest nullem (zerowane jest wyzej, przed ifem), wiec
             ## inicjalizujemy teraz po swojemu
             if (!$status) {
-                $status         = new WPBlipApi_Status ();
-                $status->user   = $options['login'];
-                $status->limit  = 20;
+                $status             = new WPBlipApi_Status ();
+                $status->user       = $options['login'];
+                $status->include    = array ('pictures');
+                $status->limit      = 20;
             }
-            $status->offset     = $offset;
-            $filtered           = $bapi->read ($status);
+            $status->offset         = $offset;
+            $filtered               = $bapi->read ($status);
 
             ## jesli skonczyly sie juz statusy (pobrane sa wszystkie statusy usera) lub jakis blad, to przerywamy
             if (!is_array ($filtered['body']) || !count ($filtered['body'])) {
@@ -276,6 +282,7 @@ function wp_blip_cache () {
         $save[] = array (
             'created_at'    => mktime ($date[3], $date[4], $date[5], $date[1], $date[2], $date[0]),
             'id'            => $status->id,
+            'picture'       => (count ($status->pictures) ? $status->pictures[0]->url : ''),
             'body'            => wp_blip_linkify (
                 htmlspecialchars ($status->body),
                 array (
@@ -330,7 +337,7 @@ function wp_blip_date_absolute ($ts, $options) {
 function wp_blip_date_relative ($ts, $options) {
     $time_diff = time () - $ts;
 
-    if ($time_diff > (86400 * $options['absolute_from'])) {
+    if ($time_diff > (86400 * min ($options['absolute_from'], 365))) {
         return wp_blip_date_absolute ($ts, $options);
     }
 
@@ -554,7 +561,11 @@ function _wp_blip_find_tags ($status) {
 function _wp_blip_get_cache_filename () {
     $options = wp_blip_get_options ();
 
-    return $GLOBALS['wp_blip_cacheroot'] .'/wp_blip.'. $options['login'] .'_'. $options['quant'] .'.cache.txt';
+    return
+        $GLOBALS['wp_blip_cacheroot'] .'/wp_blip.'.
+        ($options['login'] ? $options['login'] : '') .'_'.
+        ($options['tags'] ? $options['tags'] : '') .'_'.
+        $options['quant'] .'.cache.txt';
 }
 
 function _wp_blip_linkify__callback ($match) {
