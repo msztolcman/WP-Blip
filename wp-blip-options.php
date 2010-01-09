@@ -18,14 +18,31 @@ $wp_blip_options = wp_blip_get_options ();
 ?>
 <script type="text/javascript">
 function wp_blip_dateformat () {
-    jQuery ('#wp_blip_dateformat').attr ('readonly',  jQuery ('#wp_blip_datetype_absolute').attr ('checked') ? '' : 'readonly');
+    jQuery ('#wp_blip_dateformat').attr ('readonly', function () {
+        if (jQuery ('#wp_blip_datetype_absolute').attr ('checked')) {
+            jQuery ('#wp_blip_dateformat').css ('backgroundColor', 'transparent');
+        }
+        else {
+            jQuery ('#wp_blip_dateformat').css ('backgroundColor', '#ccc');
+            return 'readonly';
+        }
+    });
 }
 function wp_blip_absolute_from () {
-    jQuery ('#wp_blip_absolute_from').attr ('readonly',  jQuery ('#wp_blip_datetype_absolute').attr ('checked') ? 'readonly' : '');
+    jQuery ('#wp_blip_absolute_from').attr ('readonly', function () {
+        if (jQuery ('#wp_blip_datetype_absolute').attr ('checked')) {
+            jQuery ('#wp_blip_absolute_from').css ('backgroundColor', '#ccc');
+            return 'readonly';
+        }
+        else {
+            jQuery ('#wp_blip_absolute_from').css ('backgroundColor', 'transparent');
+        }
+    });
 }
-
-jQuery(function () {
+function init () {
     wp_blip_dateformat ();
+    wp_blip_absolute_from ();
+
     jQuery ('#wp_blip_datetype_relative').change (function () {
         wp_blip_dateformat ();
         wp_blip_absolute_from ();
@@ -38,7 +55,9 @@ jQuery(function () {
         wp_blip_dateformat ();
         wp_blip_absolute_from ();
     });
-});
+}
+
+jQuery (init);
 </script>
 <style type="text/css">
 div.wp_blip dt {
@@ -129,14 +148,14 @@ div.wp_blip dd {
                 <td><input type="text" name="wp_blip_absolute_from" id="wp_blip_absolute_from"
                     value="<?php echo htmlentities2 ($wp_blip_options['absolute_from']) ?>"
                     size="50" /><br />
-                    Wartość w dniach, po przekroczeniu której data będzie absolutna
+                    Wartość w dniach, po przekroczeniu której data relatywna będzie wyświetlona jako absolutna
                 </td>
             </tr>
             <tr valign="top">
                 <th scope="row"><label for="wp_blip_dateformat">Szablon daty:</label></th>
                 <td><input type="text" name="wp_blip_dateformat" id="wp_blip_dateformat"
                     value="<?php echo htmlentities2 ($wp_blip_options['dateformat']) ?>"
-                    size="50" <?php $wp_blip_options['datetype'] == 'relative' ? 'disabled="disabled"' : ''; ?> /><br />
+                    size="50" /><br />
                     Szczegóły: <a href="http://php.net/strftime">php.net/strftime</a> (domyślnie: %Y-%m-%d %H:%M:%S)
                 </td>
             </tr>
