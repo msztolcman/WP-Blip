@@ -88,9 +88,7 @@ if (class_exists ('WP_Widget')) {
 }
 
 function wp_blip_theme_include_js () {
-    echo '<style type="text/css">
-        @import url("'. get_option ('home') .'/wp-includes/js/thickbox/thickbox.css");
-    </style>';
+    wp_enqueue_style ('thickbox');
     wp_enqueue_script ('thickbox');
 }
 
