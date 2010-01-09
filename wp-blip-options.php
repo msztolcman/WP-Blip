@@ -109,7 +109,15 @@ div.wp_blip dd {
                     %url - zostanie zastąpione permalinkiem do statusu<br />
                     %body - treść statusu<br />
                     %date - data ustawienia statusu<br />
+                    %picture - jeśli status zawiera obrazek, zostanie w t miejsce wstawiona wypełniona zawartość szablonu obrazka<br />
                     Przykład: &lt;li&gt;&lt;h4&gt;&lt;a href=&quot;%url&quot;&gt;%date&lt;/a&gt;&lt;/h4&gt;&lt;br /&gt;%body&lt;/li&gt;
+                </td>
+            </tr>
+            <tr valign="top">
+                <th scope="row"><label for="wp_blip_picture_tpl">Szablon obrazka:</label></th>
+                <td><input type="text" name="wp_blip_picture_tpl" id="wp_blip_picture_tpl" value="<?php echo htmlentities2 ($wp_blip_options['picture_tpl']) ?>" size="50"/><br />
+                    %src - zostanie zastąpione permalinkiem do obrazka<br />
+                    Przykład: &lt;a href="%src" class="thickbox"&gt;&lt;img src="%src" width="100px" /&gt;&lt;/a&gt;
                 </td>
             </tr>
             <tr valign="top">
@@ -203,7 +211,7 @@ div.wp_blip dd {
         <p class="submit">
             <input type="submit" class="button-primary" value="<?php _e('Save Changes') ?>" />
             <input type="hidden" name="action" value="update" />
-            <input type="hidden" name="page_options" value="wp_blip_login,wp_blip_quant,wp_blip_time,wp_blip_tpl,wp_blip_dateformat,wp_blip_tags,wp_blip_tpl_container_pre,wp_blip_tpl_container_post,wp_blip_expand_rdir,wp_blip_expand_linked_statuses,wp_blip_datetype,wp_blip_onerror_email,wp_blip_absolute_from" />
+            <input type="hidden" name="page_options" value="wp_blip_login,wp_blip_quant,wp_blip_time,wp_blip_tpl,wp_blip_dateformat,wp_blip_tags,wp_blip_tpl_container_pre,wp_blip_tpl_container_post,wp_blip_expand_rdir,wp_blip_expand_linked_statuses,wp_blip_datetype,wp_blip_onerror_email,wp_blip_absolute_from,wp_blip_picture_tpl" />
         </p>
     </form>
 </div>
