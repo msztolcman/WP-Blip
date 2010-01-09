@@ -117,7 +117,9 @@ div.wp_blip dd {
                 <th scope="row"><label for="wp_blip_picture_tpl">Szablon obrazka:</label></th>
                 <td><input type="text" name="wp_blip_picture_tpl" id="wp_blip_picture_tpl" value="<?php echo htmlentities2 ($wp_blip_options['picture_tpl']) ?>" size="50"/><br />
                     %src - zostanie zastąpione permalinkiem do obrazka<br />
-                    Przykład: &lt;a href="%src" class="thickbox"&gt;&lt;img src="%src" width="100px" /&gt;&lt;/a&gt;
+                    Przykłady:<br />
+                        &lt;a href="%src" class="thickbox"&gt;&lt;img src="%src" width="100px" /&gt;&lt;/a&gt;<br />
+                        &lt;a href="%src" class="thickbox" rel="blip"&gt;&lt;img src="%src" width="100px" /&gt;&lt;/a&gt;
                 </td>
             </tr>
             <tr valign="top">
