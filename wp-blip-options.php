@@ -110,7 +110,7 @@ div.wp_blip dd {
                     %body - treść statusu<br />
                     %date - data ustawienia statusu<br />
                     %picture - jeśli status zawiera obrazek, zostanie w t miejsce wstawiona wypełniona zawartość szablonu obrazka<br />
-                    Przykład: &lt;li&gt;&lt;h4&gt;&lt;a href=&quot;%url&quot;&gt;%date&lt;/a&gt;&lt;/h4&gt;&lt;br /&gt;%body&lt;/li&gt;
+                    Przykład: &lt;li&gt;&lt;h4&gt;&lt;a href=&quot;%url&quot;&gt;%date&lt;/a&gt;&lt;/h4&gt;&lt;br /&gt;%picture&lt;br /&gt;%body&lt;/li&gt;
                 </td>
             </tr>
             <tr valign="top">
