@@ -9,7 +9,7 @@
 require_once 'blipapi.php';
 
 define ('WP_BLIP', true);
-define ('WP_BLIP_VERSION', '0.5.8');
+define ('WP_BLIP_VERSION', '0.6.0');
 
 if (defined ('WP_BLIP_DEBUG') && WP_BLIP_DEBUG) {
     error_reporting (E_ALL|E_STRICT|E_DEPRECATED);
@@ -157,14 +157,31 @@ function wp_blip ($join="\n", $echo=0, $on_error='wp_blip_onerror') {
         return;
     }
 
-    $pat        = array ('%date', '%body', '%url');
+    $pat        = array ('%date', '%body', '%url', '%picture');
     $ret        = array ();
     $date_fun   = 'wp_blip_date_' . $options['datetype'];
     foreach ($updates as $update) {
+        $picture = '';
+        if ($update['picture']) {
+            $picture = str_replace (
+                array (
+                    '%src',
+                    '%width',
+                    '%height'
+                ),
+                array (
+                    $update['picture'],
+                    $update['picture_width'],
+                    $update['picture_height'],
+                ),
+                $options['picture_tpl']
+            );
+        }
         $rep = array (
             $date_fun ($update['created_at'], $options),
             $update['body'],
             'http://blip.pl/s/'. $update['id'],
+            $picture
         );
 
         $ret[] = str_replace ($pat, $rep, $options['tpl']);
@@ -425,6 +442,7 @@ function wp_blip_get_options ($keys = null) {
             'onerror_notified'          => '',
             'version'                   => WP_BLIP_VERSION,
             'absolute_from'             => 365,
+            'picture_tpl'               => '<a href="%src" class="thickbox"><img src="%src" width="100px" /></a>',
         );
 
         foreach ($options as $option => &$default) {
