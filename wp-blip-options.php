@@ -199,7 +199,7 @@ div.wp_blip dd {
                 <th scope="row"><label for="wp_blip_onerror_email">W razie błędu wyślij powiadomienie na adres:</label></th>
                 <td>
                     <input type="text" name="wp_blip_onerror_email" id="wp_blip_onerror_email" value="<?php echo htmlentities2 ($wp_blip_options['onerror_email']) ?>" /><br />
-                    Zostaw puste jeśli nie chcesz otrzybywać powiadomień o błędach.
+                    Zostaw puste jeśli nie chcesz otrzymywać powiadomień o błędach.
                 </td>
             </tr>
             <tr valign="top">
