@@ -252,7 +252,7 @@ function wp_blip_cache () {
     ## jeśli filtrujemy po tagach:
     if ($options['tags']) {
         ## rozdzielamy tagi
-        $options['tags'] = preg_split ('!\s!', $options['tags']);
+        $options['tags'] = preg_split ('!\s+!', $options['tags']);
 
         ## odfiltrowujemy niechciane statusy
         $statuses = _wp_blip_filter_statuses_by_tags ($options['tags'], $statuses['body']);
