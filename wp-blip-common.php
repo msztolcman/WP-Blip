@@ -293,6 +293,10 @@ function wp_blip_cache () {
         $statuses = $statuses['body'];
     }
 
+    if (!is_array ($statuses)) {
+        return false;
+    }
+
     $save = array ();
     foreach ($statuses as $status) {
         $date = preg_split ('#[: -]#', $status->created_at);
