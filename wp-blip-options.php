@@ -14,13 +14,13 @@ if (!current_user_can ('manage_options') ) {
 require_once 'wp-blip-common.php';
 
 $wp_blip_options = wp_blip_get_options ();
-
 ?>
 <script type="text/javascript">
 function wp_blip_dateformat () {
     jQuery ('#wp_blip_dateformat').attr ('readonly', function () {
         if (jQuery ('#wp_blip_datetype_absolute').attr ('checked')) {
             jQuery ('#wp_blip_dateformat').css ('backgroundColor', 'transparent');
+            return '';
         }
         else {
             jQuery ('#wp_blip_dateformat').css ('backgroundColor', '#ccc');
@@ -36,25 +36,20 @@ function wp_blip_absolute_from () {
         }
         else {
             jQuery ('#wp_blip_absolute_from').css ('backgroundColor', 'transparent');
+            return '';
         }
     });
 }
-function init () {
+function wp_blip__callback () {
     wp_blip_dateformat ();
     wp_blip_absolute_from ();
+}
+function init () {
+    wp_blip__callback ();
 
-    jQuery ('#wp_blip_datetype_relative').change (function () {
-        wp_blip_dateformat ();
-        wp_blip_absolute_from ();
-    });
-    jQuery ('#wp_blip_datetype_relative_simple').change (function () {
-        wp_blip_dateformat ();
-        wp_blip_absolute_from ();
-    });
-    jQuery ('#wp_blip_datetype_absolute').change (function () {
-        wp_blip_dateformat ();
-        wp_blip_absolute_from ();
-    });
+    jQuery ('#wp_blip_datetype_relative').change (wp_blip__callback);
+    jQuery ('#wp_blip_datetype_relative_simple').change (wp_blip__callback);
+    jQuery ('#wp_blip_datetype_absolute').change (wp_blip__callback);
 }
 
 jQuery (init);
@@ -70,7 +65,7 @@ div.wp_blip dd {
 <div class="wrap wp_blip">
     <h2>WP-Blip!</h2>
     <form method="post" action="options.php">
-        <?php wp_nonce_field('update-options') ?>
+        <?php settings_fields( 'wp_blip_group' ); ?>
         <table class="form-table">
             <tr valign="top">
                 <th scope="row"><label for="wp_blip_login">Użytkownik w serwisie <a href="http://blip.pl">Blip!</a>:</label></th>
@@ -212,8 +207,6 @@ div.wp_blip dd {
         </table>
         <p class="submit">
             <input type="submit" class="button-primary" value="<?php _e('Save Changes') ?>" />
-            <input type="hidden" name="action" value="update" />
-            <input type="hidden" name="page_options" value="wp_blip_login,wp_blip_quant,wp_blip_time,wp_blip_tpl,wp_blip_dateformat,wp_blip_tags,wp_blip_tpl_container_pre,wp_blip_tpl_container_post,wp_blip_expand_rdir,wp_blip_expand_linked_statuses,wp_blip_datetype,wp_blip_onerror_email,wp_blip_absolute_from,wp_blip_picture_tpl" />
         </p>
     </form>
 </div>

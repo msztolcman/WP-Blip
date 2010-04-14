@@ -34,6 +34,26 @@ function wp_blip_admin_actions () {
     if ( current_user_can('manage_options') ) {
         add_options_page('WP Blip!', 'WP Blip!', 7, 'WP-Blip', 'wp_blip_option_page');
     }
+
+    add_action ('admin_init', 'wp_blip_register');
+}
+
+function wp_blip_register () {
+    register_setting ('wp_blip_group', 'wp_blip_login');
+    register_setting ('wp_blip_group', 'wp_blip_quant');
+    register_setting ('wp_blip_group', 'wp_blip_time');
+    register_setting ('wp_blip_group', 'wp_blip_tpl');
+    register_setting ('wp_blip_group', 'wp_blip_dateformat');
+    register_setting ('wp_blip_group', 'wp_blip_tags');
+    register_setting ('wp_blip_group', 'wp_blip_tpl_container_pre');
+    register_setting ('wp_blip_group', 'wp_blip_tpl_container_post');
+    register_setting ('wp_blip_group', 'wp_blip_expand_rdir');
+    register_setting ('wp_blip_group', 'wp_blip_expand_linked_statuses');
+    register_setting ('wp_blip_group', 'wp_blip_datetype');
+    register_setting ('wp_blip_group', 'wp_blip_onerror_email');
+    register_setting ('wp_blip_group', 'wp_blip_absolute_from');
+    register_setting ('wp_blip_group', 'wp_blip_picture_tpl');
+    register_setting ('wp_blip_group', 'wp_blip_group');
 }
 
 function wp_blip_option_page () {
