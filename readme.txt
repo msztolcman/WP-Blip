@@ -58,6 +58,7 @@ Niestety nie. Ale jest podobne rozszerzenie, nazywa się [Blip Widget](http://wo
 * możliwość ustalenia, od jakiego momentu daty absolutne mają być jako relatywne (np. po 7 dni od publikacji)
 * możliwość wyświetlania obrazka załączonego do statusu, dodany nowy tag dla szablonu wpisu, i dodany szablon obrazka
 * drobna poprawka obsługi błędów komunikacji z Blip.pl
+* dostosowanie do zmian w obsłudze panelu konfiguracyjnego w Wordpress 3.0
 
 = 0.5.7 =
 * poprawienie kompatybilności z WP BlipBot - jest tam starsza wersja blipapi.php
