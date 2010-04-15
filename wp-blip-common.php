@@ -331,6 +331,9 @@ function wp_blip_connect () {
         $bapi = new BlipApi ();
         $bapi->connect ();
         $bapi->uagent = 'WP Blip!/'. WP_BLIP_VERSION .' (http://wp-blip.googlecode.com)';
+        if (defined ('WP_BLIP_DEBUG') && is_int (WP_BLIP_DEBUG) && WP_BLIP_DEBUG === 2) {
+            $bapi->debug = true;
+        }
 
         if (!function_exists ('json_decode')) {
             require_once 'JSON.class.php';
