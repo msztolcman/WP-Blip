@@ -12,7 +12,7 @@ WP-Blip! służy do wyświetlania ostatnich wpisów z Blip!a w Wordpressie.
 WP-Blip! pozwala na wyświetlenie ostatnich wpisów z [BlipLoga](http://blip.pl).
 Można wyświetlać wszystkie wpisy, lub też ograniczone do dowolnego tagu. Udostępniony jest w części administracyjnej panel pozwalający na dowolną konfigurację sposoby wyświetlanych danyc, ich ilości czy innych limitów.
 
-Proszę o zgłaszanie wszelkich uwag i problemów na tagu [#wpblip](http://blip.pl/tags/wpblip) lub do użytkownika ^[mysz](http://blip.pl/users/mysz/dashboard), ewentualnie można zgłosić ticketa w [Google Code](http://code.google.com/p/wp-blip/issues/list).
+Proszę o zgłaszanie wszelkich uwag i problemów na tagu [#wpblip](http://blip.pl/tags/wpblip) lub do użytkownika ^[mysz](http://blip.pl/users/mysz/dashboard), ewentualnie można zgłosić ticketa w [Google Code](https://github.com/mysz/WP-Blip/issues).
 
 == Installation ==
 
@@ -36,7 +36,7 @@ Proszę o zgłaszanie wszelkich uwag i problemów na tagu [#wpblip](http://blip.
 
 = Gdzie mogę zgłosić błąd lub poprosić o jakąś nową funkcjonalność? =
 
-Proszę o zgłaszanie wszelkich uwag i problemów na tagu [#wpblip](http://blip.pl/tags/wpblip) lub do użytkownika [^mysz](http://blip.pl/users/mysz/dashboard), ewentualnie można zgłosić ticketa w [Google Code](http://code.google.com/p/wp-blip/issues/list).
+Proszę o zgłaszanie wszelkich uwag i problemów na tagu [#wpblip](http://blip.pl/tags/wpblip) lub do użytkownika [^mysz](http://blip.pl/users/mysz/dashboard), ewentualnie można zgłosić ticketa w [Google Code](https://github.com/mysz/WP-Blip/issues).
 
 = Czemu włączenie rozwijania linków statusów lub linków z serwisu rdir.pl spowalnia ładowanie? =
 
